@@ -1,0 +1,48 @@
+<html xmlns:wireframe="http://typo3.org/ns/TYPO3/CMS/Wireframe/ViewHelpers">
+    <div class="t3-grid-container t3js-content-container" data-tca="{tca -> wireframe:format.json.encode()}" data-language="{language}" data-uid="{uid}">
+        <table border="0" cellspacing="0" cellpadding="0" width="100%" class="t3-backend-layout-columns t3-grid-table t3js-backend-layout-columns">
+            <colgroup>
+                <f:for each="{columns}" as="column">
+                    <col style="width: {column.width}%"></col>
+                </f:for>
+            </colgroup>
+            <f:for each="{rows}" as="row">
+                <tr>
+                    <f:for each="{row.cells}" as="cell">
+                        <td valign="top"
+                            {f:if(condition: '{cell.rowSpan}', then: ' rowspan="{cell.rowSpan}"')}
+                            {f:if(condition: '{cell.columnSpan}', then: ' colspan="{cell.columnSpan}"')}
+                            data-uid="{cell.uid}"
+                            class="t3js-backend-layout-language-column-{language} t3js-backend-layout-column t3-grid-cell t3-backend-layout-column t3-backend-layout-column-{cell.uid}
+                                {f:if(condition: '!{cell.assigned}', then: ' t3-grid-cell-unassigned')}
+                                {f:if(condition: '{cell.restricted}', then: ' t3-grid-cell-restricted')}
+                            "
+                        >
+                            <div class="t3-backend-layout-column-header">
+                                <div class="t3-backend-layout-column-header-icons"></div>
+                                <div class="t3-backend-layout-column-header-label">{cell.title}</div>
+                            </div>
+                            <div
+                                class="t3js-sortable t3js-sortable-lang t3js-sortable-lang-{language} t3-content-element-wrapper
+                                    {f:if(condition: '{cell.empty}', then: ' t3-content-element-empty')}"
+                            >
+                                <div class="t3-content-element t3js-content-element" id="{wireframe:uniqueId()}">
+                                    <div class="t3js-content-new-element t3-content-wrapper-new-element" id="{wireframe:uniqueId()}">
+                                        <f:if condition="{cell.actions.prependContentElement}">
+                                            <a href="{cell.actions.prependContentElement -> f:format.htmlspecialchars()}" class="btn btn-default btn-sm">
+                                                {wireframe:icon(identifier: 'actions-document-new', size: 'small')}
+                                                {f:translate(key: 'LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:content')}
+                                            </a>
+                                        </f:if>
+                                    </div>
+                                    <div class="t3-content-element-dropzone-available t3js-content-element-dropzone-available"></div>
+                                </div>
+                                {cell.childHtml -> f:format.html()}
+                            </div>
+                        </td>
+                    </f:for>
+                </tr>
+            </f:for>
+        </table>
+    </div>
+</html>

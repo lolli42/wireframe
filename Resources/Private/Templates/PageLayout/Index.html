@@ -1,0 +1,11 @@
+<f:if condition="{infoBoxMessage}">
+    <f:be.infobox title="{infoBoxTitle}">
+        {infoBoxMessage}
+    </f:be.infobox>
+</f:if>
+
+<f:format.raw>{formBefore}</f:format.raw>
+<form id="PageLayoutController" action="{formAction}" method="post">
+    <f:format.raw>{formContent}</f:format.raw>
+</form>
+<f:format.raw>{formAfter}</f:format.raw>
