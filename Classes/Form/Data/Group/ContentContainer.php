@@ -33,13 +33,14 @@ class ContentContainer implements FormDataGroupInterface
      */
     public function compile(array $result)
     {
+        $formDataGroupProvider = $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup'];
         $dataGroups = array_intersect_key(
-            (array)$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup'],
-            array_flip((array)$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentContainer']['extends'])
+            (array)$formDataGroupProvider,
+            array_flip((array)$formDataGroupProvider['contentContainer']['extends'])
         );
-        unset($GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentContainer']['extends']);
+        unset($formDataGroupProvider['contentContainer']['extends']);
         $dataProvider = array_merge(
-            (array)$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentContainer'],
+            (array)$formDataGroupProvider['contentContainer'],
             ...array_values($dataGroups)
         );
         $orderingService = GeneralUtility::makeInstance(DependencyOrderingService::class);

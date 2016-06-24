@@ -20,12 +20,13 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 /**
- * Render a backend layout
+ * Render a translation wizard
  *
  * This is an entry container called from controllers.
  */
-class BackendLayoutContainer extends AbstractContainer
+class TranslationContainer extends AbstractContainer
 {
+
     /**
      * Entry method
      *
@@ -34,18 +35,14 @@ class BackendLayoutContainer extends AbstractContainer
     public function render()
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $columns = array_fill(
-            0,
-            (int)$this->data['processedTca']['backendLayout']['columnCount'],
-            ['width' => 100 / (int)$this->data['processedTca']['backendLayout']['columnCount']]
-        );
-        $rows = [];
-
         $view->setTemplatePathAndFilename($this->getTemplatePathAndFilename());
 
+        uasort($this->data['systemLanguageRows'], function($a, $b) {
+            return $a['title'] <=> $b['title'];
+        });
+        
         for ($i = 1; $i <= (int)$this->data['processedTca']['backendLayout']['rowCount']; $i++) {
             $row = $this->data['processedTca']['backendLayout']['rows'][$i];
-            $cells = [];
 
             if (empty($row)) {
                 continue;
@@ -58,50 +55,34 @@ class BackendLayoutContainer extends AbstractContainer
                 }
 
                 $column = $this->data['processedTca']['backendLayout']['columns'][(int)$row['columns'][$j]['position']];
-                $childHtml = '';
+                $cells = [];
 
                 if (empty($column)) {
                     continue;
                 }
 
                 if ($column['assigned']) {
-                    foreach ((array)$this->data['processedTca']['contentElements'][$column['position']] as $contentElement) {
-                        $options = $contentElement;
-                        $options['languageUid'] = $this->data['languageUid'];
-                        $options['layoutColumn'] = $column;
-                        $options['renderType'] = 'contentPreview';
-                        $options['pageLayoutView'] = $this->data['pageLayoutView'];
+                    $cells[] = $this->createCellData(0, $column, $this->data);
 
-                        $result = $this->nodeFactory->create($options)->render();
-
-                        $childHtml .= $result['html'];
+                    foreach ($this->data['systemLanguageRows'] as $language) {
+                        if ($language['uid'] > 0 && isset($this->data['languageOverlays'][$language['uid']])) {
+                            $cells[] = $this->createCellData($language['uid'], $column, $this->data['languageOverlays'][$language['uid']]);
+                        }
                     }
+
+                    $rows[] = [
+                        'cells' => $cells
+                    ];
                 }
-
-                $cells[] = [
-                    'uid' => $column['position'],
-                    'title' => $column['name'],
-                    'restricted' => $column['restricted'],
-                    'assigned' => $column['assigned'],
-                    'empty' => count($this->data['processedTca']['contentElements'][(int)$column['position']]) === 0,
-                    'locked' => $column['locked'],
-                    'actions' => $column['actions'],
-                    'childHtml' => $childHtml,
-                    'columnSpan' => (int)$column['colspan'],
-                    'rowSpan' => (int)$column['rowspan']
-                ];
             }
-
-            $rows[] = [
-                'cells' => $cells
-            ];
         }
 
         $view->assignMultiple([
-            'columns' => $columns,
+            'languages' => array_merge([$this->data['systemLanguageRows'][0]], array_filter($this->data['systemLanguageRows'], function ($language) {
+                return $language['uid'] > 0 && isset($this->data['languageOverlays'][$language['uid']]);
+            })),
             'rows' => $rows,
             'uid' => $this->data['vanillaUid'],
-            'language' => $this->data['languageUid'],
             'tca' => [
                 'container' => [
                     'table' => $this->data['tableName'],
@@ -129,15 +110,58 @@ class BackendLayoutContainer extends AbstractContainer
                 'TYPO3/CMS/Wireframe/DragDrop'
             ],
             'stylesheetFiles' => [
-                ExtensionManagementUtility::extRelPath('wireframe') . 'Resources/Public/Css/BackendLayout.css'
+                ExtensionManagementUtility::extRelPath('wireframe') . 'Resources/Public/Css/Translation.css'
             ],
             'html' => $view->render()
         ]);
     }
 
+    /**
+     * Create the data for a cell
+     *
+     * @param int $languageUid
+     * @param array $column
+     * @param array $data
+     * @return array
+     * @throws \TYPO3\CMS\Backend\Form\Exception
+     */
+    protected function createCellData($languageUid, $column, $data) {
+        $childHtml = '';
+
+        foreach ((array)$data['processedTca']['contentElements'][$column['position']] as $contentElement) {
+            $options = $contentElement;
+            $options['languageUid'] = $languageUid;
+            $options['layoutColumn'] = $column;
+            $options['renderType'] = 'contentPreview';
+            $options['pageLayoutView'] = $this->data['pageLayoutView'];
+            $options['showFlag'] = (bool)$languageUid;
+
+            $result = $this->nodeFactory->create($options)->render();
+
+            $childHtml .= $result['html'];
+        }
+
+        return [
+            'uid' => $column['position'],
+            'title' => $column['name'],
+            'restricted' => $column['restricted'],
+            'assigned' => $column['assigned'],
+            'empty' => count($data['processedTca']['contentElements'][(int)$column['position']]) === 0,
+            'locked' => $column['locked'],
+            'actions' => $column['actions'],
+            'childHtml' => $childHtml,
+            'language' => $languageUid
+        ];
+    }
+
+    /**
+     * Get the template path and filename
+     *
+     * @return string
+     */
     protected function getTemplatePathAndFilename() {
         return GeneralUtility::getFileAbsFileName(
-            'EXT:wireframe/Resources/Private/Templates/Form/Container/BackendLayout.html'
+            'EXT:wireframe/Resources/Private/Templates/Form/Container/Translation.html'
         );
     }
 }

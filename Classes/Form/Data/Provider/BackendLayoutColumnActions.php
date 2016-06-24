@@ -41,7 +41,7 @@ class BackendLayoutColumnActions implements FormDataProviderInterface
 
             $column['actions']['prependContentElement'] = BackendUtility::getModuleUrl('record_edit', [
                 'edit' => [
-                    $tcaConfiguration['table'] => [
+                    $tcaConfiguration['foreign_table'] => [
                         $result['vanillaUid'] => 'new'
                     ]
                 ],

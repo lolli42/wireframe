@@ -5,6 +5,9 @@
             <div class="t3-content-element-header t3-content-element-header-draggable t3js-content-element-draghandle">
                 <div class="t3-content-element-header-icons-left">
                     {wireframe:record.icon(table: '{table}', row: '{data}', contextMenu: 1, toolTip: 1, size: 'small') -> f:format.html()}
+                    <f:if condition="{flag}">
+                        {wireframe:icon(identifier: '{flag}', size: 'small')}
+                    </f:if>
                 </div>
                 <div class="t3-content-element-header-icons-right">
                     <div class="btn-toolbar">

@@ -8,7 +8,7 @@ if (TYPO3_MODE === 'BE') {
         'page_layout',
         'top',
         [
-            'PageLayout' => 'index'
+            'PageLayout' => 'index, translate'
         ],
         [
             'access' => 'user,group',

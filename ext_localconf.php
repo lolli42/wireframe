@@ -1,13 +1,19 @@
 <?php
 defined('TYPO3_MODE') or die();
 
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1433167478] = [
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746089] = [
     'nodeName' => 'backendLayoutContainer',
     'priority' => 40,
     'class' => \TYPO3\CMS\Wireframe\Form\Container\BackendLayoutContainer::class
 ];
 
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1433167479] = [
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746098] = [
+    'nodeName' => 'translationContainer',
+    'priority' => 40,
+    'class' => \TYPO3\CMS\Wireframe\Form\Container\TranslationContainer::class
+];
+
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746106] = [
     'nodeName' => 'contentPreview',
     'priority' => 40,
     'class' => \TYPO3\CMS\Wireframe\Form\Element\ContentPreviewElement::class

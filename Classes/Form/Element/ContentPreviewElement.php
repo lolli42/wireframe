@@ -63,6 +63,7 @@ class ContentPreviewElement extends AbstractFormElement
         $view->assignMultiple([
             'table' => $this->data['tableName'],
             'language' => $this->data['languageUid'],
+            'flag' => $this->data['showFlag'] ? $this->data['systemLanguageRows'][$this->data['languageUid']]['flagIconIdentifier'] : '',
             'record' => $this->data['vanillaUid'],
             'actions' => $this->data['actions'],
             'position' => $this->data['layoutColumn']['position'],

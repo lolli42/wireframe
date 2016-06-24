@@ -92,7 +92,7 @@ define(['jquery', 'jquery-ui/droppable'], function ($) {
 		$element.children(DragDrop.dropZoneIdentifier).addClass('drag-start');
 		$element.closest(DragDrop.columnIdentifier).removeClass('active');
 
-		$element.parents(DragDrop.columnIdentifier).find(DragDrop.addContentIdentifier).hide();
+		$element.parents(DragDrop.containerIdentifier).find(DragDrop.addContentIdentifier).hide();
 		$element.find(DragDrop.dropZoneIdentifier).hide();
 
 		// make the drop zones visible
@@ -118,7 +118,7 @@ define(['jquery', 'jquery-ui/droppable'], function ($) {
 		// Show create new element button
 		$element.children(DragDrop.dropZoneIdentifier).removeClass('drag-start');
 		$element.closest(DragDrop.columnIdentifier).addClass('active');
-		$element.parents(DragDrop.columnIdentifier).find(DragDrop.addContentIdentifier).show();
+		$element.parents(DragDrop.containerIdentifier).find(DragDrop.addContentIdentifier).show();
 		$element.find(DragDrop.dropZoneIdentifier).show();
 		$element.find('.ui-draggable-copy-message').remove();
 
@@ -165,7 +165,7 @@ define(['jquery', 'jquery-ui/droppable'], function ($) {
 		// send an AJAX request via the AjaxDataHandler
 		var element = $pasteAction ? $draggable : parseInt($draggable.data('uid'));
 		if (element > 0) {
-			var tca = $droppable.closest(DragDrop.containerIdentifier).data('tca');
+			var tca = $droppable.closest('[data-tca]').data('tca');
 			// if the item was moved to the top of the cell, use the container uid instead
 			var target = !$droppable.closest(DragDrop.contentIdentifier).attr('data-uid') ?
 				$droppable.closest(DragDrop.containerIdentifier).data('uid') :
@@ -186,7 +186,7 @@ define(['jquery', 'jquery-ui/droppable'], function ($) {
 			}
 
 			if (copyAction) {
-				parameters['cmd'][table][element] = {
+				parameters['cmd'][tca.element.table][element] = {
 					copy: {
 						action: 'paste',
 						target: target, // @todo not sure about this regarding foreign_field
@@ -243,9 +243,8 @@ define(['jquery', 'jquery-ui/droppable'], function ($) {
 						$draggable.detach().css({top: 0, left: 0})
 							.insertAfter($droppable.closest(DragDrop.contentIdentifier));
 					}
-					if ($('.t3js-page-lang-column').length || copyAction) {
-						self.location.reload(true);
-					}
+					// should be always reloaded otherwise the history back of the browser doesn't work correctly
+					self.location.reload(true);
 				}
 			});
 		});

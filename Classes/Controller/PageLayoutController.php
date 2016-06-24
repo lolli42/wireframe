@@ -48,6 +48,130 @@ class PageLayoutController extends ActionController
     protected $view;
 
     /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->translationConfigurationProvider = GeneralUtility::makeInstance(TranslationConfigurationProvider::class);
+    }
+
+    /**
+     * Index action
+     *
+     * @param int $page
+     * @param int $language
+     * @return void
+     */
+    public function indexAction($page, $language = 0)
+    {
+        if ($page > 0) {
+            $translationInfo = $this->translationConfigurationProvider->translationInfo('pages', $page);
+            $formData = array_merge([
+                'renderType' => 'backendLayoutContainer',
+                'pageLayoutView' => GeneralUtility::makeInstance(PageLayoutView::class),
+                'languageUid' => $language
+            ], $this->compileFormData($language, $translationInfo));
+
+            $formResult = $this->createFormResult($formData);
+
+            $this->view->assignMultiple([
+                'formBefore' => $formResult['before'],
+                'formAfter' => $formResult['after'],
+                'formContent' => $formResult['html'],
+                'formAction' => $this->getHref('PageContent', 'index', [
+                    'page' => $page,
+                    'language' => $language
+                ])
+            ]);
+        } else {
+            $this->view->assignMultiple([
+                'infoBoxTitle' => 'Title',
+                'infoBoxMessage' => 'Message'
+            ]);
+        }
+    }
+
+    /**
+     * Translate action
+     *
+     * @param int $page
+     * @param int $language
+     * @return void
+     */
+    public function translateAction($page, $language = 0)
+    {
+        if ($page > 0) {
+            $translationInfo = $this->translationConfigurationProvider->translationInfo('pages', $page);
+            $languages = $language > 0 ? [$translationInfo['translations'][$language]['sys_language_uid']] : array_keys($translationInfo['translations']);
+            $formData = array_merge([
+                'renderType' => 'translationContainer',
+                'pageLayoutView' => GeneralUtility::makeInstance(PageLayoutView::class),
+                'languageUid' => $language
+            ], $this->compileFormData(0, $translationInfo));
+
+            foreach ($languages as $language) {
+                $formData['languageOverlays'][$language] = $this->compileFormData($language, $translationInfo);
+            }
+
+            $formResult = $this->createFormResult($formData);
+
+            $this->view->assignMultiple([
+                'formBefore' => $formResult['before'],
+                'formAfter' => $formResult['after'],
+                'formContent' => $formResult['html'],
+                'formAction' => $this->getHref('PageContent', 'translate', [
+                    'page' => $page,
+                    'language' => $language
+                ])
+            ]);
+        } else {
+            $this->view->assignMultiple([
+                'infoBoxTitle' => 'Title',
+                'infoBoxMessage' => 'Message'
+            ]);
+        }
+    }
+
+    /**
+     * @param int $languageUid
+     * @param array $translationInfo
+     * @return array
+     */
+    protected function compileFormData($languageUid, $translationInfo) {
+        $formDataGroup = GeneralUtility::makeInstance(ContentContainer::class);
+        $formDataCompiler = GeneralUtility::makeInstance(FormDataCompiler::class, $formDataGroup);
+        $formDataCompilerInput = [
+            'tableName' => $languageUid > 0 ? $translationInfo['translation_table'] : $translationInfo['table'],
+            'vanillaUid' => $languageUid > 0 && $translationInfo['translations'][$languageUid] ?
+                $translationInfo['translations'][$languageUid]['uid'] : $translationInfo['uid'],
+            'command' => 'edit',
+            'returnUrl' => ''
+        ];
+
+        return $formDataCompiler->compile($formDataCompilerInput);
+    }
+
+    /**
+     * @param $formData
+     * @return array
+     * @throws \TYPO3\CMS\Backend\Form\Exception
+     */
+    protected function createFormResult($formData) {
+        $formResultCompiler = GeneralUtility::makeInstance(FormResultCompiler::class);
+        $nodeFactory = GeneralUtility::makeInstance(NodeFactory::class);
+
+        $formResult = $nodeFactory->create($formData)->render();
+
+        $formResultCompiler->mergeResult($formResult);
+
+        $formResult['before'] = $formResultCompiler->JStop();
+        $formResult['after'] = $formResultCompiler->printNeededJSFunctions();
+
+        return $formResult;
+    }
+
+    /**
      * Initializes the arguments
      *
      * @return void
@@ -68,7 +192,15 @@ class PageLayoutController extends ActionController
             $this->request->setArgument('page', (int)GeneralUtility::_GP('id'));
         }
 
+        if ($this->request->hasArgument('action')) {
+            $sessionData['action'] = $this->request->getArgument('action');
+        }
+
         $this->getBackendUserAuthentication()->setAndSaveSessionData(self::class, $sessionData);
+
+        if ($sessionData['action'] && $sessionData['action'] !== $this->request->getControllerActionName()) {
+            $this->forward($sessionData['action']);
+        }
     }
 
     /**
@@ -83,7 +215,7 @@ class PageLayoutController extends ActionController
         parent::initializeView($view);
 
         if ($this->request->hasArgument('page') && (int)$this->request->getArgument('page') > 0) {
-            $this->generateMenu((int)$this->request->getArgument('page'));
+            $this->generateMenus((int)$this->request->getArgument('page'));
         }
 
         $this->view->getModuleTemplate()->setFlashMessageQueue($this->controllerContext->getFlashMessageQueue());
@@ -126,14 +258,38 @@ class PageLayoutController extends ActionController
     }
 
     /**
-     * Generates the action menu
+     * Generates the menus
      *
      * @param int $page
      * @return void
      * @throws \TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException
      */
-    protected function generateMenu($page)
+    protected function generateMenus($page)
     {
+        $request = $this->getControllerContext()->getRequest();
+        $actions = [
+            'Columns' => 'index',
+            'Languages' => 'translate'
+        ];
+
+        $menu = $this->view->getModuleTemplate()->getDocHeaderComponent()->getMenuRegistry()->makeMenu();
+        $menu->setIdentifier('actionMenu');
+
+        foreach ($actions as $label => $action) {
+            $menu->addMenuItem(
+                $menu->makeMenuItem()
+                    ->setTitle($label)
+                    ->setHref(
+                        $this->getHref('PageLayout', $action, ['page' => $page, 'action' => $action])
+                    )
+                    ->setActive(
+                        $request->getControllerActionName() === $action
+                    )
+            );
+        }
+
+        $this->view->getModuleTemplate()->getDocHeaderComponent()->getMenuRegistry()->addMenu($menu);
+
         $translations = $this->translationConfigurationProvider->translationInfo('pages', $page);
         $languages = array_intersect_key(
             $this->translationConfigurationProvider->getSystemLanguages(),
@@ -142,13 +298,12 @@ class PageLayoutController extends ActionController
 
         $menu = $this->view->getModuleTemplate()->getDocHeaderComponent()->getMenuRegistry()->makeMenu();
         $menu->setIdentifier('languageMenu');
-        // $menu->setLabel($this->getLanguageService()->sL('LLL:EXT:lang/locallang_general.xlf:LGL.language'));
 
         foreach ($languages as $language) {
             $menu->addMenuItem(
                 $menu->makeMenuItem()
                     ->setTitle($language['title'])
-                    ->setHref($this->getHref('PageLayout', 'index', [
+                    ->setHref($this->getHref('PageLayout', $request->getControllerActionName(), [
                         'page' => $page,
                         'language' => $language['uid']
                     ]))
@@ -157,66 +312,5 @@ class PageLayoutController extends ActionController
         }
 
         $this->view->getModuleTemplate()->getDocHeaderComponent()->getMenuRegistry()->addMenu($menu);
-    }
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->translationConfigurationProvider = GeneralUtility::makeInstance(TranslationConfigurationProvider::class);
-    }
-
-    /**
-     * Index action
-     *
-     * @param int $page
-     * @param int $language
-     * @return void
-     */
-    public function indexAction($page, $language = 0)
-    {
-        if ($page > 0) {
-            $translations = $this->translationConfigurationProvider->translationInfo('pages', $page);
-            $formDataGroup = GeneralUtility::makeInstance(ContentContainer::class);
-            $formDataCompiler = GeneralUtility::makeInstance(FormDataCompiler::class, $formDataGroup);
-            $formResultCompiler = GeneralUtility::makeInstance(FormResultCompiler::class);
-            $nodeFactory = GeneralUtility::makeInstance(NodeFactory::class);
-
-            $formDataCompilerInput = [
-                'tableName' => $language > 0 ? $translations['translation_table'] : $translations['table'],
-                'vanillaUid' => $language > 0 && $translations['translations'][$language] ?
-                    $translations['translations'][$language]['uid'] : $translations['uid'],
-                'command' => 'edit',
-                'returnUrl' => ''
-            ];
-
-            $formData = $formDataCompiler->compile($formDataCompilerInput);
-            
-            $formData['renderType'] = 'backendLayoutContainer';
-            $formData['languageUid'] = $language;
-            // only for `PageLayoutViewDrawItemHookInterface`
-            $formData['pageLayoutView'] = GeneralUtility::makeInstance(PageLayoutView::class);
-
-            $formResult = $nodeFactory->create($formData)->render();
-
-            $formResultCompiler->mergeResult($formResult);
-
-            $this->view->assignMultiple([
-                'formBefore' => $formResultCompiler->JStop(),
-                'formAfter' => $formResultCompiler->printNeededJSFunctions(),
-                'formContent' => $formResult['html'],
-                'formAction' => $this->getHref('PageContent', 'index', [
-                    'page' => $page,
-                    'language' => $language['uid']
-                ])
-            ]);
-        } else {
-            $this->view->assignMultiple([
-                'infoBoxTitle' => 'Title',
-                'infoBoxMessage' => 'Message'
-            ]);
-        }
     }
 }
