@@ -1,5 +1,5 @@
 <?php
-namespace TYPO3\CMS\Wireframe\Form\Data\Provider;
+namespace TYPO3\CMS\Wireframe\Form\Data\Provider\BackendLayout;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -25,33 +25,32 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
- * Add backend layout for this record.
+ * Add backend layout configuration for this record
  */
-class BackendLayoutConfiguration implements FormDataProviderInterface
+class Configuration implements FormDataProviderInterface
 {
 
     /**
-     * Add backend layout configuration
+     * Add data
      *
      * @param array $result
      * @return array
+     * @todo Needs decomposition into `PageTsConfig` and `DataProviderApi`
      */
     public function addData(array $result)
     {
-        if (
-            !in_array($result['tableName'], ['pages', 'pages_language_overlay']) &&
-            !empty((array)$result['pageTsConfig']['TCEMAIN.']['table.'][$result['tableName'] . '.']['backendLayout.'])
-        ) {
-            $config = ArrayUtility::flatten(
-                $result['pageTsConfig']['TCEMAIN.']['table.'][$result['tableName'] . '.']['backendLayout.']
-            );
+        $columnName = $result['processedTca']['contentElementTca']['column_name'];
+        $configuration = $result['pageTsConfig']['TCEMAIN.']['table.'][$result['tableName'] . '.']['backendLayout.'];
+
+        if ($result['tableName'] !== 'pages' && !empty($configuration[$columnName . '.'])) {
+            $configuration = ArrayUtility::flatten($configuration);
 
             $layout = BackendLayout::create(
-                $result['tableName'],
-                $result['tableName'],
+                $result['tableName'] . '_' . $columnName,
+                $result['tableName'] . '_' . $columnName,
                 implode('\r\n', array_map(function ($key, $value) {
                     return $key . ' = ' . $value;
-                }, $config))
+                }, $configuration))
             );
         } else {
             $dataProviderCollection = GeneralUtility::makeInstance(DataProviderCollection::class);
@@ -62,7 +61,7 @@ class BackendLayoutConfiguration implements FormDataProviderInterface
                 $dataProviderCollection->add($key, $provider);
             }
 
-            if (in_array($result['tableName'], ['pages', 'pages_language_overlay'])) {
+            if ($result['tableName'] === 'pages') {
                 $selected = !empty($result['databaseRow']['backend_layout']) ?
                     $result['databaseRow']['backend_layout'][0] : null;
 
@@ -82,8 +81,8 @@ class BackendLayoutConfiguration implements FormDataProviderInterface
                         }
                     }
                 }
-            } elseif (!empty((array)$result['pageTsConfig']['TCEMAIN.']['table.'][$result['tableName'] . '.']['backendLayout.'])) {
-                $selected = $result['pageTsConfig']['TCEMAIN.']['table.'][$result['tableName'] . '.']['backendLayout'];
+            } elseif (!empty($configuration[$columnName])) {
+                $selected = $configuration[$columnName];
             } else {
                 $selected = false;
             }
@@ -100,6 +99,7 @@ class BackendLayoutConfiguration implements FormDataProviderInterface
             $conditionMatcher = GeneralUtility::makeInstance(ConditionMatcher::class);
             $parser->parse($parser->checkIncludeLines($layout->getConfiguration()), $conditionMatcher);
 
+            // @todo Currently just a hack, an own key like `backendLayout` would be cleaner but currently not allowed because of exceptions `1438079402` and `1440601540`.
             $result['processedTca']['backendLayout'] = GeneralUtility::removeDotsFromTS($parser->setup['backend_layout.']);
 
             // restructure configuration

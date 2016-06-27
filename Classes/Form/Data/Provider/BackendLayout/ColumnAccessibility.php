@@ -1,5 +1,5 @@
 <?php
-namespace TYPO3\CMS\Wireframe\Form\Data\Provider;
+namespace TYPO3\CMS\Wireframe\Form\Data\Provider\BackendLayout;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -20,9 +20,9 @@ use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Add accessibility information about backend layout columns.
+ * Add accessibility information about backend layout columns
  */
-class BackendLayoutColumnAccessibility implements FormDataProviderInterface
+class ColumnAccessibility implements FormDataProviderInterface
 {
 
     /**

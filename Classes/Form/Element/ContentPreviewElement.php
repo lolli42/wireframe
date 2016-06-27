@@ -63,11 +63,21 @@ class ContentPreviewElement extends AbstractFormElement
         $view->assignMultiple([
             'table' => $this->data['tableName'],
             'language' => $this->data['languageUid'],
-            'flag' => $this->data['showFlag'] ? $this->data['systemLanguageRows'][$this->data['languageUid']]['flagIconIdentifier'] : '',
+            'flag' => $this->data['showFlag'] ? $this->data['systemLanguageRows'][$this->data['processedTca']['languageUid']]['flagIconIdentifier'] : '',
             'record' => $this->data['vanillaUid'],
-            'actions' => $this->data['actions'],
+            'actions' => array_merge($this->data['processedTca']['actions'], [
+                'insertAfter' => BackendUtility::getModuleUrl('record_edit', [
+                    'edit' => [
+                        $this->data['tableName'] => [
+                            -$this->data['vanillaUid'] => 'new'
+                        ]
+                    ],
+                    'returnUrl' => $this->data['returnUrl']
+                ])
+            ]),
             'position' => $this->data['layoutColumn']['position'],
-            'visible' => $this->data['visible'],
+            'visible' => $this->data['processedTca']['visible'],
+            'errors' => $this->data['hasErrors'],
             'data' => $this->data['databaseRow'],
             'childHtml' => $header . '<span class="exampleContent">' . $content . '</span>'
         ]);
@@ -113,7 +123,7 @@ class ContentPreviewElement extends AbstractFormElement
     protected function renderContent()
     {
         try {
-            $template = GeneralUtility::getFileAbsFileName($this->data['previewTemplateFilename']);
+            $template = GeneralUtility::getFileAbsFileName($this->data['processedTca']['fluidPreviewTemplateFilename']);
 
             if (empty($template)) {
                 return null;

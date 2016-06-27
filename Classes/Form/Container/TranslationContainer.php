@@ -15,6 +15,7 @@ namespace TYPO3\CMS\Wireframe\Form\Container;
  */
 
 use TYPO3\CMS\Backend\Form\Container\AbstractContainer;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
@@ -62,12 +63,8 @@ class TranslationContainer extends AbstractContainer
                 }
 
                 if ($column['assigned']) {
-                    $cells[] = $this->createCellData(0, $column, $this->data);
-
-                    foreach ($this->data['systemLanguageRows'] as $language) {
-                        if ($language['uid'] > 0 && isset($this->data['languageOverlays'][$language['uid']])) {
-                            $cells[] = $this->createCellData($language['uid'], $column, $this->data['languageOverlays'][$language['uid']]);
-                        }
+                    foreach ($this->data['languageUids'] as $language) {
+                        $cells[] = $this->createCellData($language, $column);
                     }
 
                     $rows[] = [
@@ -76,11 +73,11 @@ class TranslationContainer extends AbstractContainer
                 }
             }
         }
-
+        
         $view->assignMultiple([
-            'languages' => array_merge([$this->data['systemLanguageRows'][0]], array_filter($this->data['systemLanguageRows'], function ($language) {
-                return $language['uid'] > 0 && isset($this->data['languageOverlays'][$language['uid']]);
-            })),
+            'languages' => [$this->data['systemLanguageRows'][0]] + array_filter($this->data['systemLanguageRows'], function ($language) {
+                return $language['uid'] > 0 && in_array($language['uid'], $this->data['languageUids']);
+            }),
             'rows' => $rows,
             'uid' => $this->data['vanillaUid'],
             'tca' => [
@@ -88,13 +85,13 @@ class TranslationContainer extends AbstractContainer
                     'table' => $this->data['tableName'],
                 ],
                 'element' => [
-                    'table' => $this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['foreign_table'],
+                    'table' => $this->data['processedTca']['contentElementTca']['foreign_table'],
                     'fields' => [
-                        'position' => $this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['position_field'],
-                        'language' => $GLOBALS['TCA'][$this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['foreign_table']]['ctrl']['languageField'],
+                        'position' => $this->data['processedTca']['contentElementTca']['position_field'],
+                        'language' => $GLOBALS['TCA'][$this->data['processedTca']['contentElementTca']['foreign_table']]['ctrl']['languageField'],
                         'foreign' => [
-                            'table' => $this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['foreign_table_field'],
-                            'field' => $this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['foreign_field']
+                            'table' => $this->data['processedTca']['contentElementTca']['foreign_table_field'],
+                            'field' => $this->data['processedTca']['contentElementTca']['foreign_field']
                         ]
                     ]
                 ]
@@ -121,24 +118,28 @@ class TranslationContainer extends AbstractContainer
      *
      * @param int $languageUid
      * @param array $column
-     * @param array $data
      * @return array
      * @throws \TYPO3\CMS\Backend\Form\Exception
      */
-    protected function createCellData($languageUid, $column, $data) {
+    protected function createCellData($languageUid, $column) {
         $childHtml = '';
 
-        foreach ((array)$data['processedTca']['contentElements'][$column['position']] as $contentElement) {
-            $options = $contentElement;
-            $options['languageUid'] = $languageUid;
-            $options['layoutColumn'] = $column;
-            $options['renderType'] = 'contentPreview';
-            $options['pageLayoutView'] = $this->data['pageLayoutView'];
-            $options['showFlag'] = (bool)$languageUid;
+        foreach ((array)$this->data['processedTca']['contentElementPositions'][$column['position']] as $contentElement) {
+            if ($contentElement['processedTca']['languageUid'] === $languageUid) {
+                $options = array_merge($contentElement, [
+                    'layoutColumn' => $column,
+                    'renderType' => 'contentPreview',
+                    'pageLayoutView' => $this->data['pageLayoutView'],
+                    'showFlag' => (bool)$languageUid,
+                    'returnUrl' => $this->data['returnUrl'],
+                    'hasErrors' => !$contentElement['processedTca']['hasTranslations'] && $languageUid > 0 &&
+                        !$this->data['allowInconsistentLanguageHandling']
+                ]);
 
-            $result = $this->nodeFactory->create($options)->render();
+                $result = $this->nodeFactory->create($options)->render();
 
-            $childHtml .= $result['html'];
+                $childHtml .= $result['html'];
+            }
         }
 
         return [
@@ -146,9 +147,24 @@ class TranslationContainer extends AbstractContainer
             'title' => $column['name'],
             'restricted' => $column['restricted'],
             'assigned' => $column['assigned'],
-            'empty' => count($data['processedTca']['contentElements'][(int)$column['position']]) === 0,
+            'empty' => count($this->data['processedTca']['contentElementPositions'][(int)$column['position']]) === 0,
             'locked' => $column['locked'],
-            'actions' => $column['actions'],
+            'actions' => [
+                'prependContentElement' => BackendUtility::getModuleUrl('record_edit', [
+                    'edit' => [
+                        $this->data['processedTca']['contentElementTca']['foreign_table'] => [
+                            $this->data['defaultLanguageRow'] ? $this->data['defaultLanguageRow']['uid'] : $this->data['vanillaUid'] => 'new'
+                        ]
+                    ],
+                    'defVals' => [
+                        $this->data['processedTca']['contentElementTca']['foreign_table'] => [
+                            $this->data['processedTca']['contentElementTca']['position_field'] => $column['position'],
+                            $GLOBALS['TCA'][$this->data['processedTca']['contentElementTca']['foreign_table']]['ctrl']['languageField'] => $languageUid
+                        ]
+                    ],
+                    'returnUrl' => $this->data['returnUrl']
+                ])
+            ],
             'childHtml' => $childHtml,
             'language' => $languageUid
         ];

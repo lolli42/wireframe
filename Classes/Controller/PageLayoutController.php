@@ -66,12 +66,11 @@ class PageLayoutController extends ActionController
     public function indexAction($page, $language = 0)
     {
         if ($page > 0) {
-            $translationInfo = $this->translationConfigurationProvider->translationInfo('pages', $page);
             $formData = array_merge([
                 'renderType' => 'backendLayoutContainer',
                 'pageLayoutView' => GeneralUtility::makeInstance(PageLayoutView::class),
                 'languageUid' => $language
-            ], $this->compileFormData($language, $translationInfo));
+            ], $this->compileFormData($page));
 
             $formResult = $this->createFormResult($formData);
 
@@ -103,16 +102,12 @@ class PageLayoutController extends ActionController
     {
         if ($page > 0) {
             $translationInfo = $this->translationConfigurationProvider->translationInfo('pages', $page);
-            $languages = $language > 0 ? [$translationInfo['translations'][$language]['sys_language_uid']] : array_keys($translationInfo['translations']);
+            $languages = $language > 0 ? [$language] : array_keys($translationInfo['translations']);
             $formData = array_merge([
                 'renderType' => 'translationContainer',
                 'pageLayoutView' => GeneralUtility::makeInstance(PageLayoutView::class),
-                'languageUid' => $language
-            ], $this->compileFormData(0, $translationInfo));
-
-            foreach ($languages as $language) {
-                $formData['languageOverlays'][$language] = $this->compileFormData($language, $translationInfo);
-            }
+                'languageUids' => array_merge([0], $languages)
+            ], $this->compileFormData($page));
 
             $formResult = $this->createFormResult($formData);
 
@@ -134,19 +129,18 @@ class PageLayoutController extends ActionController
     }
 
     /**
-     * @param int $languageUid
-     * @param array $translationInfo
+     * @param int $page
      * @return array
      */
-    protected function compileFormData($languageUid, $translationInfo) {
+    protected function compileFormData($page) {
         $formDataGroup = GeneralUtility::makeInstance(ContentContainer::class);
         $formDataCompiler = GeneralUtility::makeInstance(FormDataCompiler::class, $formDataGroup);
         $formDataCompilerInput = [
-            'tableName' => $languageUid > 0 ? $translationInfo['translation_table'] : $translationInfo['table'],
-            'vanillaUid' => $languageUid > 0 && $translationInfo['translations'][$languageUid] ?
-                $translationInfo['translations'][$languageUid]['uid'] : $translationInfo['uid'],
+            'tableName' => 'pages',
+            'vanillaUid' => $page,
             'command' => 'edit',
-            'returnUrl' => ''
+            'returnUrl' => $this->getHref(null, null, []),
+            'columnsToProcess' => ['content']
         ];
 
         return $formDataCompiler->compile($formDataCompilerInput);
@@ -215,7 +209,7 @@ class PageLayoutController extends ActionController
         parent::initializeView($view);
 
         if ($this->request->hasArgument('page') && (int)$this->request->getArgument('page') > 0) {
-            $this->generateMenus((int)$this->request->getArgument('page'));
+            $this->createMenus((int)$this->request->getArgument('page'));
         }
 
         $this->view->getModuleTemplate()->setFlashMessageQueue($this->controllerContext->getFlashMessageQueue());
@@ -264,7 +258,7 @@ class PageLayoutController extends ActionController
      * @return void
      * @throws \TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException
      */
-    protected function generateMenus($page)
+    protected function createMenus($page)
     {
         $request = $this->getControllerContext()->getRequest();
         $actions = [
@@ -290,10 +284,16 @@ class PageLayoutController extends ActionController
 
         $this->view->getModuleTemplate()->getDocHeaderComponent()->getMenuRegistry()->addMenu($menu);
 
-        $translations = $this->translationConfigurationProvider->translationInfo('pages', $page);
-        $languages = array_intersect_key(
-            $this->translationConfigurationProvider->getSystemLanguages(),
-            array_merge(array_flip([0]), $translations['translations'])
+        $translationInfo = $this->translationConfigurationProvider->translationInfo('pages', $page);
+        $languages = $this->translationConfigurationProvider->getSystemLanguages($page);
+
+        uasort($languages, function($a, $b) {
+            return $a['title'] <=> $b['title'];
+        });
+
+        $languages = [$languages[0]] + array_intersect_key(
+            $languages,
+            $translationInfo['translations']
         );
 
         $menu = $this->view->getModuleTemplate()->getDocHeaderComponent()->getMenuRegistry()->makeMenu();

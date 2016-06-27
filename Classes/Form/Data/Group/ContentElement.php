@@ -20,9 +20,9 @@ use TYPO3\CMS\Core\Service\DependencyOrderingService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * A data provider group for a content container
+ * A data provider group for postprocessing an inline content element
  */
-class ContentContainer implements FormDataGroupInterface
+class ContentElement implements FormDataGroupInterface
 {
     /**
      * Compile form data
@@ -33,7 +33,7 @@ class ContentContainer implements FormDataGroupInterface
      */
     public function compile(array $result)
     {
-        $dataProvider = $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentContainer'];
+        $dataProvider = $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentElement'];
         $orderingService = GeneralUtility::makeInstance(DependencyOrderingService::class);
         $orderedDataProvider = $orderingService->orderByDependencies($dataProvider, 'before', 'depends');
 

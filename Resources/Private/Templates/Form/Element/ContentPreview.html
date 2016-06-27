@@ -1,5 +1,7 @@
 <html xmlns:wireframe="http://typo3.org/ns/TYPO3/CMS/Wireframe/ViewHelpers">
-    <div class="t3-content-element t3js-content-element t3js-content-element-sortable{f:if(condition: '{visible}', then: ' t3-content-element-hidden')}"
+    <div class="t3-content-element t3js-content-element t3js-content-element-sortable
+        {f:if(condition: '{visible}', then: ' t3-content-element-hidden')}
+        {f:if(condition: '{errors}', then: ' t3-content-element-danger')}"
          id="{wireframe:uniqueId()}" data-table="{table}" data-uid="{record}">
         <div class="t3-content-element-dragitem" id="{wireframe:uniqueId()}">
             <div class="t3-content-element-header t3-content-element-header-draggable t3js-content-element-draghandle">

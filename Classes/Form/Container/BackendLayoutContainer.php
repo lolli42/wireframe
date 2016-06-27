@@ -15,6 +15,7 @@ namespace TYPO3\CMS\Wireframe\Form\Container;
  */
 
 use TYPO3\CMS\Backend\Form\Container\AbstractContainer;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
@@ -65,16 +66,22 @@ class BackendLayoutContainer extends AbstractContainer
                 }
 
                 if ($column['assigned']) {
-                    foreach ((array)$this->data['processedTca']['contentElements'][$column['position']] as $contentElement) {
-                        $options = $contentElement;
-                        $options['languageUid'] = $this->data['languageUid'];
-                        $options['layoutColumn'] = $column;
-                        $options['renderType'] = 'contentPreview';
-                        $options['pageLayoutView'] = $this->data['pageLayoutView'];
+                    foreach ((array)$this->data['processedTca']['contentElementPositions'][$column['position']] as $contentElement) {
+                        if ($contentElement['processedTca']['languageUid'] === $this->data['languageUid']) {
+                            $options = array_merge($contentElement, [
+                                'layoutColumn' => $column,
+                                'renderType' => 'contentPreview',
+                                'pageLayoutView' => $this->data['pageLayoutView'],
+                                'showFlag' => (bool)$this->data['languageUid'],
+                                'returnUrl' => $this->data['returnUrl'],
+                                'hasErrors' => !$contentElement['processedTca']['hasTranslations'] && $this->data['languageUid'] > 0 &&
+                                    !$this->data['allowInconsistentLanguageHandling']
+                            ]);
 
-                        $result = $this->nodeFactory->create($options)->render();
+                            $result = $this->nodeFactory->create($options)->render();
 
-                        $childHtml .= $result['html'];
+                            $childHtml .= $result['html'];
+                        }
                     }
                 }
 
@@ -83,9 +90,24 @@ class BackendLayoutContainer extends AbstractContainer
                     'title' => $column['name'],
                     'restricted' => $column['restricted'],
                     'assigned' => $column['assigned'],
-                    'empty' => count($this->data['processedTca']['contentElements'][(int)$column['position']]) === 0,
+                    'empty' => count($this->data['processedTca']['contentElementPositions'][(int)$column['position']]) === 0,
                     'locked' => $column['locked'],
-                    'actions' => $column['actions'],
+                    'actions' => [
+                        'prependContentElement' => BackendUtility::getModuleUrl('record_edit', [
+                            'edit' => [
+                                $this->data['processedTca']['contentElementTca']['foreign_table'] => [
+                                    $this->data['vanillaUid'] => 'new'
+                                ]
+                            ],
+                            'defVals' => [
+                                $this->data['processedTca']['contentElementTca']['foreign_table'] => [
+                                    $this->data['processedTca']['contentElementTca']['position_field'] => $column['position'],
+                                    $GLOBALS['TCA'][$this->data['processedTca']['contentElementTca']['foreign_table']]['ctrl']['languageField'] => $this->data['languageUid']
+                                ]
+                            ],
+                            'returnUrl' => $this->data['returnUrl']
+                        ])
+                    ],
                     'childHtml' => $childHtml,
                     'columnSpan' => (int)$column['colspan'],
                     'rowSpan' => (int)$column['rowspan']
@@ -107,13 +129,13 @@ class BackendLayoutContainer extends AbstractContainer
                     'table' => $this->data['tableName'],
                 ],
                 'element' => [
-                    'table' => $this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['foreign_table'],
+                    'table' => $this->data['processedTca']['contentElementTca']['foreign_table'],
                     'fields' => [
-                        'position' => $this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['position_field'],
-                        'language' => $GLOBALS['TCA'][$this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['foreign_table']]['ctrl']['languageField'],
+                        'position' => $this->data['processedTca']['contentElementTca']['position_field'],
+                        'language' => $GLOBALS['TCA'][$this->data['processedTca']['contentElementTca']['foreign_table']]['ctrl']['languageField'],
                         'foreign' => [
-                            'table' => $this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['foreign_table_field'],
-                            'field' => $this->data['processedTca']['ctrl']['EXT']['wireframe']['content_elements']['foreign_field']
+                            'table' => $this->data['processedTca']['contentElementTca']['foreign_table_field'],
+                            'field' => $this->data['processedTca']['contentElementTca']['foreign_field']
                         ]
                     ]
                 ]

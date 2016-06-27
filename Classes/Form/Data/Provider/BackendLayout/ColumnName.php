@@ -1,5 +1,5 @@
 <?php
-namespace TYPO3\CMS\Wireframe\Form\Data\Provider;
+namespace TYPO3\CMS\Wireframe\Form\Data\Provider\BackendLayout;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -20,9 +20,9 @@ use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Add names of backend layout columns.
+ * Add names of backend layout columns
  */
-class BackendLayoutColumnName implements FormDataProviderInterface
+class ColumnName implements FormDataProviderInterface
 {
 
     /**
@@ -44,12 +44,12 @@ class BackendLayoutColumnName implements FormDataProviderInterface
 
         foreach ($result['processedTca']['backendLayout']['columns'] as &$column) {
             $name = BackendUtility::getProcessedValue(
-                $result['processedTca']['ctrl']['EXT']['backend']['content_elements']['table'],
-                $result['processedTca']['ctrl']['EXT']['backend']['content_elements']['position_column'],
+                $result['processedTca']['contentElementTca']['foreign_table'],
+                $result['processedTca']['contentElementTca']['position_column'],
                 $column['colPos']
             );
 
-            if (in_array($result['tableName'], ['pages', 'pages_language_overlay'])) {
+            if ($result['tableName'] === 'pages') {
                 $tcaItems = $backendLayoutView->getColPosListItemsParsed(
                     $result['tableName'] === 'pages' ? $result['databaseRow']['uid'] : $result['databaseRow']['pid']
                 );
