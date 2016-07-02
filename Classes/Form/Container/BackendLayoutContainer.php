@@ -14,7 +14,6 @@ namespace TYPO3\CMS\Wireframe\Form\Container;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Backend\Form\Container\AbstractContainer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -75,7 +74,8 @@ class BackendLayoutContainer extends AbstractContainer
                                 'showFlag' => (bool)$this->data['languageUid'],
                                 'returnUrl' => $this->data['returnUrl'],
                                 'hasErrors' => !$contentElement['processedTca']['hasTranslations'] && $this->data['languageUid'] > 0 &&
-                                    !$this->data['allowInconsistentLanguageHandling']
+                                    !$this->data['allowInconsistentLanguageHandling'],
+                                'displayLegacyActions' => $this->data['displayLegacyActions']
                             ]);
 
                             $result = $this->nodeFactory->create($options)->render();
@@ -85,14 +85,8 @@ class BackendLayoutContainer extends AbstractContainer
                     }
                 }
 
-                $cells[] = [
-                    'uid' => $column['position'],
-                    'title' => $column['name'],
-                    'restricted' => $column['restricted'],
-                    'assigned' => $column['assigned'],
-                    'empty' => count($this->data['processedTca']['contentElementPositions'][(int)$column['position']]) === 0,
-                    'locked' => $column['locked'],
-                    'actions' => [
+                if ($this->data['displayLegacyActions']) {
+                    $column['actions'] = [
                         'prependContentElement' => BackendUtility::getModuleUrl('record_edit', [
                             'edit' => [
                                 $this->data['processedTca']['contentElementTca']['foreign_table'] => [
@@ -107,7 +101,17 @@ class BackendLayoutContainer extends AbstractContainer
                             ],
                             'returnUrl' => $this->data['returnUrl']
                         ])
-                    ],
+                    ];
+                }
+
+                $cells[] = [
+                    'uid' => $column['position'],
+                    'title' => $column['name'],
+                    'restricted' => $column['restricted'],
+                    'assigned' => $column['assigned'],
+                    'empty' => count($this->data['processedTca']['contentElementPositions'][(int)$column['position']]) === 0,
+                    'locked' => $column['locked'],
+                    'actions' => $column['actions'],
                     'childHtml' => $childHtml,
                     'columnSpan' => (int)$column['colspan'],
                     'rowSpan' => (int)$column['rowspan']
@@ -151,6 +155,7 @@ class BackendLayoutContainer extends AbstractContainer
                 'TYPO3/CMS/Wireframe/DragDrop'
             ],
             'stylesheetFiles' => [
+                ExtensionManagementUtility::extRelPath('wireframe') . 'Resources/Public/Css/DragDrop.css',
                 ExtensionManagementUtility::extRelPath('wireframe') . 'Resources/Public/Css/BackendLayout.css'
             ],
             'html' => $view->render()

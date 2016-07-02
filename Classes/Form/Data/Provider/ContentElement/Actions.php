@@ -38,15 +38,6 @@ class Actions implements FormDataProviderInterface
         // @todo PageTsConfig
         $tcaConfiguration = $result['processedTca'];
 
-        $result['processedTca']['actions']['insertAfter'] = BackendUtility::getModuleUrl('record_edit', [
-            'edit' => [
-                $result['tableName'] => [
-                    -$result['vanillaUid'] => 'new'
-                ]
-            ],
-            'returnUrl' => $result['returnUrl']
-        ]);
-
         if (
             $this->getBackendUserAuthentication()->recordEditAccessInternals($result['tableName'],
                 $result['databaseRow']) &&

@@ -13,10 +13,16 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746098] = [
     'class' => \TYPO3\CMS\Wireframe\Form\Container\TranslationContainer::class
 ];
 
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746112] = [
+    'nodeName' => 'contentElementDefinitionsSidebar',
+    'priority' => 40,
+    'class' => \TYPO3\CMS\Wireframe\Form\Container\ContentElement\SidebarContainer::class
+];
+
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746106] = [
     'nodeName' => 'contentPreview',
     'priority' => 40,
-    'class' => \TYPO3\CMS\Wireframe\Form\Element\ContentPreviewElement::class
+    'class' => \TYPO3\CMS\Wireframe\Form\Element\ContentElement\PreviewElement::class
 ];
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentContainer'] = array_merge(
@@ -40,7 +46,7 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentContai
         ],
         \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Tca::class => [
             'depends' => [
-                \TYPO3\CMS\Backend\Form\FormDataProvider\TcaRecordTitle::class
+                \TYPO3\CMS\Backend\Form\FormDataProvider\InitializeProcessedTca::class
             ]
         ],
         \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Inline::class => [
@@ -69,3 +75,49 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentElemen
         ],
     ]
 );
+
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentElementDefinitions'] = [
+    \TYPO3\CMS\Backend\Form\FormDataProvider\ReturnUrl::class => [],
+    \TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseEditRow::class => [
+        'depends' => [
+            \TYPO3\CMS\Backend\Form\FormDataProvider\ReturnUrl::class
+        ]
+    ],
+    \TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseParentPageRow::class => [
+        'depends' => [
+            \TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseEditRow::class
+        ]
+    ],
+    \TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseUserPermissionCheck::class => [
+        'depends' => [
+            \TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseParentPageRow::class
+        ]
+    ],
+    \TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseEffectivePid::class => [
+        'depends' => [
+            \TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseParentPageRow::class,
+            \TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseUserPermissionCheck::class
+        ]
+    ],
+    \TYPO3\CMS\Backend\Form\FormDataProvider\PageTsConfig::class => [
+        'depends' => [
+            \TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseEffectivePid::class
+        ]
+    ],
+    \TYPO3\CMS\Backend\Form\FormDataProvider\InitializeProcessedTca::class => [
+        'depends' => [
+            \TYPO3\CMS\Backend\Form\FormDataProvider\PageTsConfig::class
+        ]
+    ],
+    \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Tca::class => [
+        'depends' => [
+            \TYPO3\CMS\Backend\Form\FormDataProvider\InitializeProcessedTca::class
+        ]
+    ],
+    \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Definitions::class => [
+        'depends' => [
+            \TYPO3\CMS\Backend\Form\FormDataProvider\PageTsConfig::class,
+            \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Tca::class
+        ]
+    ],
+];

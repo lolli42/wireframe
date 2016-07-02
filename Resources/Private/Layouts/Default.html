@@ -1,0 +1,25 @@
+<div class="module" data-module-id="{moduleId}" data-module-name="{moduleName}">
+    <f:if condition="{formTag}">
+        <f:then>
+            <f:format.raw>{formTag}</f:format.raw>
+        </f:then>
+    </f:if>
+    <f:if condition="{docHeader.enabled}">
+        <f:render partial="DocHeader" arguments="{docHeader:docHeader}" />
+    </f:if>
+    <div class="module-body t3js-module-body">
+        <f:flashMessages queueIdentifier="{flashMessageQueueIdentifier}" />
+        <f:format.raw>{content}</f:format.raw>
+    </div>
+    <f:if condition="{formTag}">
+        <f:then>
+            </form>
+        </f:then>
+    </f:if>
+</div>
+<div class="t3-sidebar t3js-sidebar" data-toggle="collapsed" data-expandable data-min-width="280">
+    <div class="t3-sidebar-border t3js-sidebar-border ui-resizable-handle ui-resizable-w">
+        <div class="t3-sidebar-toggle t3js-sidebar-toggle"></div>
+    </div>
+    <f:format.raw>{inspector.html}{inspector.after}</f:format.raw>
+</div>

@@ -18,7 +18,7 @@ use TYPO3\CMS\Backend\Form\FormDataProviderInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 
 /**
- * Add Fluid preview template file name for a content element
+ * Add Fluid preview template file name for a content element from PageTsConfig
  */
 class FluidPreviewTemplate implements FormDataProviderInterface
 {

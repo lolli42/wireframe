@@ -14,7 +14,6 @@ namespace TYPO3\CMS\Wireframe\Form\Container;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Backend\Form\Container\AbstractContainer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -107,7 +106,8 @@ class TranslationContainer extends AbstractContainer
                 'TYPO3/CMS/Wireframe/DragDrop'
             ],
             'stylesheetFiles' => [
-                ExtensionManagementUtility::extRelPath('wireframe') . 'Resources/Public/Css/Translation.css'
+                ExtensionManagementUtility::extRelPath('wireframe') . 'Resources/Public/Css/DragDrop.css',
+                ExtensionManagementUtility::extRelPath('wireframe') . 'Resources/Public/Css/BackendLayout.css'
             ],
             'html' => $view->render()
         ]);

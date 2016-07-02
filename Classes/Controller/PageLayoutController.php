@@ -19,12 +19,14 @@ use TYPO3\CMS\Backend\Form\FormResultCompiler;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\View\BackendTemplateView;
 use TYPO3\CMS\Backend\View\PageLayoutView;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Wireframe\Form\Data\Group\ContentContainer;
 use TYPO3\CMS\Backend\Form\FormDataCompiler;
 use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
+use TYPO3\CMS\Wireframe\Form\Data\Group\ContentElement\Definitions;
 
 /**
  * Controller for Web > Page module
@@ -69,24 +71,29 @@ class PageLayoutController extends ActionController
             $formData = array_merge([
                 'renderType' => 'backendLayoutContainer',
                 'pageLayoutView' => GeneralUtility::makeInstance(PageLayoutView::class),
-                'languageUid' => $language
+                'languageUid' => $language,
+                'displayLegacyActions' => false
             ], $this->compileFormData($page));
 
             $formResult = $this->createFormResult($formData);
 
             $this->view->assignMultiple([
-                'formBefore' => $formResult['before'],
-                'formAfter' => $formResult['after'],
-                'formContent' => $formResult['html'],
-                'formAction' => $this->getHref('PageContent', 'index', [
-                    'page' => $page,
-                    'language' => $language
-                ])
+                'form' => [
+                    'before' => $formResult['before'],
+                    'after' => $formResult['after'],
+                    'content' => $formResult['html'],
+                    'action' => $this->getHref('PageContent', 'index', [
+                        'page' => $page,
+                        'language' => $language
+                    ])
+                ]
             ]);
         } else {
             $this->view->assignMultiple([
-                'infoBoxTitle' => 'Title',
-                'infoBoxMessage' => 'Message'
+                'infoBox' => [
+                    'title' => 'Help',
+                    'message' => '...'
+                ]
             ]);
         }
     }
@@ -112,28 +119,33 @@ class PageLayoutController extends ActionController
             $formResult = $this->createFormResult($formData);
 
             $this->view->assignMultiple([
-                'formBefore' => $formResult['before'],
-                'formAfter' => $formResult['after'],
-                'formContent' => $formResult['html'],
-                'formAction' => $this->getHref('PageContent', 'translate', [
-                    'page' => $page,
-                    'language' => $language
-                ])
+                'form' => [
+                    'before' => $formResult['before'],
+                    'after' => $formResult['after'],
+                    'content' => $formResult['html'],
+                    'action' => $this->getHref('PageContent', 'translate', [
+                        'page' => $page,
+                        'language' => $language
+                    ])
+                ]
             ]);
         } else {
             $this->view->assignMultiple([
-                'infoBoxTitle' => 'Title',
-                'infoBoxMessage' => 'Message'
+                'infoBox' => [
+                    'title' => 'Help',
+                    'message' => '...'
+                ]
             ]);
         }
     }
 
     /**
      * @param int $page
+     * @param string $formDataGroupClass
      * @return array
      */
-    protected function compileFormData($page) {
-        $formDataGroup = GeneralUtility::makeInstance(ContentContainer::class);
+    protected function compileFormData($page, $formDataGroupClass = ContentContainer::class) {
+        $formDataGroup = GeneralUtility::makeInstance($formDataGroupClass);
         $formDataCompiler = GeneralUtility::makeInstance(FormDataCompiler::class, $formDataGroup);
         $formDataCompilerInput = [
             'tableName' => 'pages',
@@ -159,7 +171,8 @@ class PageLayoutController extends ActionController
 
         $formResultCompiler->mergeResult($formResult);
 
-        $formResult['before'] = $formResultCompiler->JStop();
+        // @todo The API says `JavaScript code added BEFORE the form is drawn` but in fact it renders the CSS
+        $this->view->getModuleTemplate()->getPageRenderer()->addHeaderData($formResultCompiler->JStop());
         $formResult['after'] = $formResultCompiler->printNeededJSFunctions();
 
         return $formResult;
@@ -198,7 +211,7 @@ class PageLayoutController extends ActionController
     }
 
     /**
-     * Set up the doc header properly here
+     * Set up the view
      *
      * @param ViewInterface $view
      * @return void
@@ -208,11 +221,14 @@ class PageLayoutController extends ActionController
         /** @var BackendTemplateView $view */
         parent::initializeView($view);
 
+        $this->view->getModuleTemplate()->getView()->setLayoutRootPaths(['EXT:wireframe/Resources/Private/Layouts']);
+        $this->view->getModuleTemplate()->getView()->setTemplateRootPaths(['EXT:wireframe/Resources/Private/Templates']);
+        $this->view->getModuleTemplate()->setFlashMessageQueue($this->controllerContext->getFlashMessageQueue());
+
         if ($this->request->hasArgument('page') && (int)$this->request->getArgument('page') > 0) {
             $this->createMenus((int)$this->request->getArgument('page'));
+            $this->createInspector((int)$this->request->getArgument('page'));
         }
-
-        $this->view->getModuleTemplate()->setFlashMessageQueue($this->controllerContext->getFlashMessageQueue());
     }
 
     /**
@@ -249,6 +265,22 @@ class PageLayoutController extends ActionController
             ->setRequest($this->request)
             ->reset()
             ->uriFor($action, $parameters, $controller);
+    }
+
+    /**
+     * Generates the inspector
+     *
+     * @param int $page
+     */
+    protected function createInspector($page) {
+        $formData = $this->compileFormData($page, Definitions::class);
+        $this->view->getModuleTemplate()->getView()->assign(
+            'inspector',
+            $this->createFormResult(array_merge(
+                ['renderType' => 'contentElementDefinitionsSidebar'],
+                $formData
+            ))
+        );
     }
 
     /**

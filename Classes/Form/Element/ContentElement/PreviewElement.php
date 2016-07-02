@@ -1,5 +1,5 @@
 <?php
-namespace TYPO3\CMS\Wireframe\Form\Element;
+namespace TYPO3\CMS\Wireframe\Form\Element\ContentElement;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -14,7 +14,6 @@ namespace TYPO3\CMS\Wireframe\Form\Element;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\PageLayoutView;
 use TYPO3\CMS\Backend\View\PageLayoutViewDrawItemHookInterface;
@@ -28,11 +27,12 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Service\FlexFormService;
 use TYPO3\CMS\Fluid\View\StandaloneView;
+use TYPO3\CMS\Wireframe\Form\Element\AbstractElement;
 
 /**
  * Generation of preview of a content element
  */
-class ContentPreviewElement extends AbstractFormElement
+class PreviewElement extends AbstractElement
 {
     /**
      * Render the preview
@@ -59,13 +59,9 @@ class ContentPreviewElement extends AbstractFormElement
         if ($legacyMode && $content === null) {
             $content = $this->renderLegacyContent($header);
         }
-
-        $view->assignMultiple([
-            'table' => $this->data['tableName'],
-            'language' => $this->data['languageUid'],
-            'flag' => $this->data['showFlag'] ? $this->data['systemLanguageRows'][$this->data['processedTca']['languageUid']]['flagIconIdentifier'] : '',
-            'record' => $this->data['vanillaUid'],
-            'actions' => array_merge($this->data['processedTca']['actions'], [
+        
+        if ($this->data['displayLegacyActions']) {
+            $this->data['processedTca']['actions'] = array_merge($this->data['processedTca']['actions'], [
                 'insertAfter' => BackendUtility::getModuleUrl('record_edit', [
                     'edit' => [
                         $this->data['tableName'] => [
@@ -74,7 +70,15 @@ class ContentPreviewElement extends AbstractFormElement
                     ],
                     'returnUrl' => $this->data['returnUrl']
                 ])
-            ]),
+            ]);
+        }
+
+        $view->assignMultiple([
+            'table' => $this->data['tableName'],
+            'language' => $this->data['languageUid'],
+            'flag' => $this->data['showFlag'] ? $this->data['systemLanguageRows'][$this->data['processedTca']['languageUid']]['flagIconIdentifier'] : '',
+            'record' => $this->data['vanillaUid'],
+            'actions' => $this->data['processedTca']['actions'],
             'position' => $this->data['layoutColumn']['position'],
             'visible' => $this->data['processedTca']['visible'],
             'errors' => $this->data['hasErrors'],
@@ -89,7 +93,7 @@ class ContentPreviewElement extends AbstractFormElement
 
     protected function getTemplatePathAndFilename() {
         return GeneralUtility::getFileAbsFileName(
-            'EXT:wireframe/Resources/Private/Templates/Form/Element/ContentPreview.html'
+            'EXT:wireframe/Resources/Private/Templates/Form/Element/ContentElement/Preview.html'
         );
     }
 
