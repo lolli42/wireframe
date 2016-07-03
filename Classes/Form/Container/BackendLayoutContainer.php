@@ -30,6 +30,7 @@ class BackendLayoutContainer extends AbstractContainer
      * Entry method
      *
      * @return array As defined in initializeResultArray() of AbstractNode
+     * @todo Create some kind of an iterator for layouts
      */
     public function render()
     {
@@ -69,7 +70,7 @@ class BackendLayoutContainer extends AbstractContainer
                         if ($contentElement['processedTca']['languageUid'] === $this->data['languageUid']) {
                             $options = array_merge($contentElement, [
                                 'layoutColumn' => $column,
-                                'renderType' => 'contentPreview',
+                                'renderType' => 'contentElementPreview',
                                 'pageLayoutView' => $this->data['pageLayoutView'],
                                 'showFlag' => (bool)$this->data['languageUid'],
                                 'returnUrl' => $this->data['returnUrl'],
@@ -85,25 +86,6 @@ class BackendLayoutContainer extends AbstractContainer
                     }
                 }
 
-                if ($this->data['displayLegacyActions']) {
-                    $column['actions'] = [
-                        'prependContentElement' => BackendUtility::getModuleUrl('record_edit', [
-                            'edit' => [
-                                $this->data['processedTca']['contentElementTca']['foreign_table'] => [
-                                    $this->data['vanillaUid'] => 'new'
-                                ]
-                            ],
-                            'defVals' => [
-                                $this->data['processedTca']['contentElementTca']['foreign_table'] => [
-                                    $this->data['processedTca']['contentElementTca']['position_field'] => $column['position'],
-                                    $GLOBALS['TCA'][$this->data['processedTca']['contentElementTca']['foreign_table']]['ctrl']['languageField'] => $this->data['languageUid']
-                                ]
-                            ],
-                            'returnUrl' => $this->data['returnUrl']
-                        ])
-                    ];
-                }
-
                 $cells[] = [
                     'uid' => $column['position'],
                     'title' => $column['name'],
@@ -111,7 +93,7 @@ class BackendLayoutContainer extends AbstractContainer
                     'assigned' => $column['assigned'],
                     'empty' => count($this->data['processedTca']['contentElementPositions'][(int)$column['position']]) === 0,
                     'locked' => $column['locked'],
-                    'actions' => $column['actions'],
+                    'actions' => $this->data['displayLegacyActions'] ? $this->createLegacyActions($column['position']) : [],
                     'childHtml' => $childHtml,
                     'columnSpan' => (int)$column['colspan'],
                     'rowSpan' => (int)$column['rowspan']
@@ -133,13 +115,13 @@ class BackendLayoutContainer extends AbstractContainer
                     'table' => $this->data['tableName'],
                 ],
                 'element' => [
-                    'table' => $this->data['processedTca']['contentElementTca']['foreign_table'],
+                    'table' => $this->data['processedTca']['contentContainerConfig']['foreign_table'],
                     'fields' => [
-                        'position' => $this->data['processedTca']['contentElementTca']['position_field'],
-                        'language' => $GLOBALS['TCA'][$this->data['processedTca']['contentElementTca']['foreign_table']]['ctrl']['languageField'],
+                        'position' => $this->data['processedTca']['contentContainerConfig']['position_field'],
+                        'language' => $GLOBALS['TCA'][$this->data['processedTca']['contentContainerConfig']['foreign_table']]['ctrl']['languageField'],
                         'foreign' => [
-                            'table' => $this->data['processedTca']['contentElementTca']['foreign_table_field'],
-                            'field' => $this->data['processedTca']['contentElementTca']['foreign_field']
+                            'table' => $this->data['processedTca']['contentContainerConfig']['foreign_table_field'],
+                            'field' => $this->data['processedTca']['contentContainerConfig']['foreign_field']
                         ]
                     ]
                 ]
@@ -166,5 +148,44 @@ class BackendLayoutContainer extends AbstractContainer
         return GeneralUtility::getFileAbsFileName(
             'EXT:wireframe/Resources/Private/Templates/Form/Container/BackendLayout.html'
         );
+    }
+
+    protected function createLegacyActions($position) {
+        $actions = [];
+
+        if ($this->data['disableContentElementWizard']) {
+            $actions['prependContentElement'] = BackendUtility::getModuleUrl(
+                'record_edit',
+                [
+                    'edit' => [
+                        $this->data['processedTca']['contentContainerConfig']['foreign_table'] => [
+                            $this->data['vanillaUid'] => 'new'
+                        ]
+                    ],
+                    'defVals' => [
+                        $this->data['processedTca']['contentContainerConfig']['foreign_table'] => [
+                            $this->data['processedTca']['contentContainerConfig']['position_field'] => $position,
+                            $this->data['processedTca']['contentElementTca']['ctrl']['languageField'] => $this->data['languageUid']
+                        ]
+                    ],
+                    'returnUrl' => $this->data['returnUrl']
+                ]
+            );
+        } else {
+            $actions['prependContentElement'] = BackendUtility::getModuleUrl(
+                'content_element',
+                [
+                    'action' => 'createAction',
+                    'containerTable' => $this->data['tableName'],
+                    'containerField' => $this->data['processedTca']['contentContainerConfig']['column_name'],
+                    'containerUid' => $this->data['vanillaUid'],
+                    'columnPosition' => $position,
+                    'languageUid' => $this->data['languageUid'],
+                    'returnUrl' => $this->data['returnUrl']
+                ]
+            );
+        }
+
+        return $actions;
     }
 }

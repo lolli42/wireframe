@@ -20,7 +20,7 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\CMS\Wireframe\Form\Container\AbstractContainer;
 
 /**
- * Render a backend layout
+ * Render a sidebar with content element definitions
  *
  * This is an entry container called from controllers.
  */

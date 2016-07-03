@@ -30,7 +30,8 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\CMS\Wireframe\Form\Element\AbstractElement;
 
 /**
- * Generation of preview of a content element
+ * Generates the preview of a content element
+ *
  */
 class PreviewElement extends AbstractElement
 {
@@ -61,16 +62,10 @@ class PreviewElement extends AbstractElement
         }
         
         if ($this->data['displayLegacyActions']) {
-            $this->data['processedTca']['actions'] = array_merge($this->data['processedTca']['actions'], [
-                'insertAfter' => BackendUtility::getModuleUrl('record_edit', [
-                    'edit' => [
-                        $this->data['tableName'] => [
-                            -$this->data['vanillaUid'] => 'new'
-                        ]
-                    ],
-                    'returnUrl' => $this->data['returnUrl']
-                ])
-            ]);
+            $this->data['processedTca']['actions'] = array_merge(
+                $this->data['processedTca']['actions'],
+                $this->createLegacyActions()
+            );
         }
 
         $view->assignMultiple([
@@ -150,6 +145,44 @@ class PreviewElement extends AbstractElement
         }
 
         return null;
+    }
+
+    /**
+     * @return array
+     * @deprecated
+     */
+    protected function createLegacyActions() {
+        $actions = [];
+
+        if ($this->data['disableContentElementWizard']) {
+            $actions['insertAfter'] = BackendUtility::getModuleUrl(
+                'record_edit',
+                [
+                    'edit' => [
+                        $this->data['tableName'] => [
+                            -$this->data['vanillaUid'] => 'new'
+                        ]
+                    ],
+                    'returnUrl' => $this->data['returnUrl']
+                ]
+            );
+        } else {
+            $actions['insertAfter'] = BackendUtility::getModuleUrl(
+                'content_element',
+                [
+                    'action' => 'createAction',
+                    'containerTable' => $this->data['inlineParentTableName'],
+                    'containerField' => $this->data['inlineParentFieldName'],
+                    'containerUid' => $this->data['inlineParentUid'],
+                    'columnPosition' => $this->data['layoutColumn']['position'],
+                    'ancestorUid' => $this->data['vanillaUid'],
+                    'languageUid' => $this->data['processedTca']['languageUid'],
+                    'returnUrl' => $this->data['returnUrl']
+                ]
+            );
+        }
+
+        return $actions;
     }
 
     /**

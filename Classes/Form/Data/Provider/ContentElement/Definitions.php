@@ -38,7 +38,7 @@ class Definitions implements FormDataProviderInterface
             $groups = (array)$pageTsConfig['mod.']['wizards.']['newContentElement.']['wizardItems.'];
         } else {
             $groups = (array)$pageTsConfig['TCEFORM.']['table.'][$table . '.']
-                [$result['processedTca']['contentElementTca']['column_name'] . '.']['definitions.'];
+                [$result['processedTca']['contentContainerConfig']['column_name'] . '.']['definitions.'];
         }
 
         foreach ($groups as $group => $_) {
@@ -60,7 +60,7 @@ class Definitions implements FormDataProviderInterface
                 'header' => $group['header'],
                 'elements' => $this->processGroup(
                     $group,
-                    $result['processedTca']['contentElementTca']['foreign_table'],
+                    $result['processedTca']['contentContainerConfig']['foreign_table'],
                     $pageTsConfig
                 )
             ];
@@ -98,7 +98,7 @@ class Definitions implements FormDataProviderInterface
                     'tt_content_defValues.' => 'defaultValues',
                     'defaultValues.' => 'defaultValues'
                 ], $definition);
-                //debug($definition);
+
                 if ($definition['params']) {
                     $parameters = GeneralUtility::explodeUrl2Array($definition['params'], true);
 
@@ -106,11 +106,15 @@ class Definitions implements FormDataProviderInterface
                         (array)$definition['defaultValues'],
                         (array)$parameters['defVals'][$table]
                     );
+
+                    unset($definition['params']);
                 }
 
                 if ($this->isValidDefinition($definition, $table, $pageTsConfig)) {
+                    $definition['key'] = $key;
+                    
                     foreach ((array)$definition['defaultValues'] as $column => $value) {
-                        $definition['params'] .= is_array($GLOBALS['TCA'][$table]['columns'][$column]) ?
+                        $definition['parameters'] .= is_array($GLOBALS['TCA'][$table]['columns'][$column]) ?
                             '&defVals[' . $table . '][' . $column . ']=' . rawurlencode($value) : '';
                     }
 

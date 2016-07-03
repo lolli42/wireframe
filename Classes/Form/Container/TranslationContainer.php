@@ -23,6 +23,8 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
  * Render a translation wizard
  *
  * This is an entry container called from controllers.
+ *
+ * @todo Inherit from BackendLayoutContainer
  */
 class TranslationContainer extends AbstractContainer
 {
@@ -39,6 +41,10 @@ class TranslationContainer extends AbstractContainer
 
         uasort($this->data['systemLanguageRows'], function($a, $b) {
             return $a['title'] <=> $b['title'];
+        });
+
+        $languages = [$this->data['systemLanguageRows'][0]] + array_filter($this->data['systemLanguageRows'], function ($language) {
+            return $language['uid'] > 0 && in_array($language['uid'], $this->data['languageUids']);
         });
         
         for ($i = 1; $i <= (int)$this->data['processedTca']['backendLayout']['rowCount']; $i++) {
@@ -62,8 +68,8 @@ class TranslationContainer extends AbstractContainer
                 }
 
                 if ($column['assigned']) {
-                    foreach ($this->data['languageUids'] as $language) {
-                        $cells[] = $this->createCellData($language, $column);
+                    foreach ($languages as $language) {
+                        $cells[] = $this->createCellData((int)$language['uid'], $column);
                     }
 
                     $rows[] = [
@@ -72,11 +78,9 @@ class TranslationContainer extends AbstractContainer
                 }
             }
         }
-        
+
         $view->assignMultiple([
-            'languages' => [$this->data['systemLanguageRows'][0]] + array_filter($this->data['systemLanguageRows'], function ($language) {
-                return $language['uid'] > 0 && in_array($language['uid'], $this->data['languageUids']);
-            }),
+            'languages' => $languages,
             'rows' => $rows,
             'uid' => $this->data['vanillaUid'],
             'tca' => [
@@ -84,13 +88,13 @@ class TranslationContainer extends AbstractContainer
                     'table' => $this->data['tableName'],
                 ],
                 'element' => [
-                    'table' => $this->data['processedTca']['contentElementTca']['foreign_table'],
+                    'table' => $this->data['processedTca']['contentContainerConfig']['foreign_table'],
                     'fields' => [
-                        'position' => $this->data['processedTca']['contentElementTca']['position_field'],
-                        'language' => $GLOBALS['TCA'][$this->data['processedTca']['contentElementTca']['foreign_table']]['ctrl']['languageField'],
+                        'position' => $this->data['processedTca']['contentContainerConfig']['position_field'],
+                        'language' => $this->data['processedTca']['contentElementTca']['ctrl']['languageField'],
                         'foreign' => [
-                            'table' => $this->data['processedTca']['contentElementTca']['foreign_table_field'],
-                            'field' => $this->data['processedTca']['contentElementTca']['foreign_field']
+                            'table' => $this->data['processedTca']['contentContainerConfig']['foreign_table_field'],
+                            'field' => $this->data['processedTca']['contentContainerConfig']['foreign_field']
                         ]
                     ]
                 ]
@@ -128,12 +132,13 @@ class TranslationContainer extends AbstractContainer
             if ($contentElement['processedTca']['languageUid'] === $languageUid) {
                 $options = array_merge($contentElement, [
                     'layoutColumn' => $column,
-                    'renderType' => 'contentPreview',
+                    'renderType' => 'contentElementPreview',
                     'pageLayoutView' => $this->data['pageLayoutView'],
                     'showFlag' => (bool)$languageUid,
                     'returnUrl' => $this->data['returnUrl'],
                     'hasErrors' => !$contentElement['processedTca']['hasTranslations'] && $languageUid > 0 &&
-                        !$this->data['allowInconsistentLanguageHandling']
+                        !$this->data['allowInconsistentLanguageHandling'],
+                    'displayLegacyActions' => $this->data['displayLegacyActions']
                 ]);
 
                 $result = $this->nodeFactory->create($options)->render();
@@ -149,25 +154,54 @@ class TranslationContainer extends AbstractContainer
             'assigned' => $column['assigned'],
             'empty' => count($this->data['processedTca']['contentElementPositions'][(int)$column['position']]) === 0,
             'locked' => $column['locked'],
-            'actions' => [
-                'prependContentElement' => BackendUtility::getModuleUrl('record_edit', [
+            'actions' => $this->data['displayLegacyActions'] ? $this->createLegacyActions((int)$column['position'], $languageUid) : [],
+            'childHtml' => $childHtml,
+            'language' => $languageUid
+        ];
+    }
+
+    /**
+     * @param int $position
+     * @param int $languageUid
+     * @return array
+     */
+    protected function createLegacyActions($position, $languageUid) {
+        $actions = [];
+
+        if ($this->data['disableContentElementWizard']) {
+            $actions['prependContentElement'] = BackendUtility::getModuleUrl(
+                'record_edit',
+                [
                     'edit' => [
-                        $this->data['processedTca']['contentElementTca']['foreign_table'] => [
+                        $this->data['processedTca']['contentContainerConfig']['foreign_table'] => [
                             $this->data['defaultLanguageRow'] ? $this->data['defaultLanguageRow']['uid'] : $this->data['vanillaUid'] => 'new'
                         ]
                     ],
                     'defVals' => [
-                        $this->data['processedTca']['contentElementTca']['foreign_table'] => [
-                            $this->data['processedTca']['contentElementTca']['position_field'] => $column['position'],
-                            $GLOBALS['TCA'][$this->data['processedTca']['contentElementTca']['foreign_table']]['ctrl']['languageField'] => $languageUid
+                        $this->data['processedTca']['contentContainerConfig']['foreign_table'] => [
+                            $this->data['processedTca']['contentContainerConfig']['position_field'] => $position,
+                            $this->data['processedTca']['contentElementTca']['ctrl']['languageField'] => $languageUid
                         ]
                     ],
                     'returnUrl' => $this->data['returnUrl']
-                ])
-            ],
-            'childHtml' => $childHtml,
-            'language' => $languageUid
-        ];
+                ]
+            );
+        } else {
+            $actions['prependContentElement'] = BackendUtility::getModuleUrl(
+                'content_element',
+                [
+                    'action' => 'createAction',
+                    'containerTable' => $this->data['tableName'],
+                    'containerField' => $this->data['processedTca']['contentContainerConfig']['column_name'],
+                    'containerUid' => $this->data['defaultLanguageRow'] ? $this->data['defaultLanguageRow']['uid'] : $this->data['vanillaUid'],
+                    'columnPosition' => $position,
+                    'languageUid' => $languageUid,
+                    'returnUrl' => $this->data['returnUrl']
+                ]
+            );
+        }
+
+        return $actions;
     }
 
     /**

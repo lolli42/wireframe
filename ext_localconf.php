@@ -1,10 +1,18 @@
 <?php
 defined('TYPO3_MODE') or die();
 
+// @todo Use correct time stamps
+
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746089] = [
     'nodeName' => 'backendLayoutContainer',
     'priority' => 40,
     'class' => \TYPO3\CMS\Wireframe\Form\Container\BackendLayoutContainer::class
+];
+
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746109] = [
+    'nodeName' => 'backendLayoutPositionContainer',
+    'priority' => 40,
+    'class' => \TYPO3\CMS\Wireframe\Form\Container\BackendLayout\PositionContainer::class
 ];
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746098] = [
@@ -14,15 +22,27 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746098] = [
 ];
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746112] = [
-    'nodeName' => 'contentElementDefinitionsSidebar',
+    'nodeName' => 'contentElementSidebarContainer',
     'priority' => 40,
     'class' => \TYPO3\CMS\Wireframe\Form\Container\ContentElement\SidebarContainer::class
 ];
 
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746113] = [
+    'nodeName' => 'contentElementWizardContainer',
+    'priority' => 40,
+    'class' => \TYPO3\CMS\Wireframe\Form\Container\ContentElement\WizardContainer::class
+];
+
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746106] = [
-    'nodeName' => 'contentPreview',
+    'nodeName' => 'contentElementPreview',
     'priority' => 40,
     'class' => \TYPO3\CMS\Wireframe\Form\Element\ContentElement\PreviewElement::class
+];
+
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1466746108] = [
+    'nodeName' => 'contentElementWizardItem',
+    'priority' => 40,
+    'class' => \TYPO3\CMS\Wireframe\Form\Element\ContentElement\WizardItemElement::class
 ];
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentContainer'] = array_merge(
@@ -57,6 +77,13 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentContai
         \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Positions::class => [
             'depends' => [
                 \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Inline::class
+            ]
+        ],
+        // @todo Not always needed
+        \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Definitions::class => [
+            'depends' => [
+                \TYPO3\CMS\Backend\Form\FormDataProvider\PageTsConfig::class,
+                \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Tca::class
             ]
         ]
     ]
@@ -119,5 +146,5 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['contentElemen
             \TYPO3\CMS\Backend\Form\FormDataProvider\PageTsConfig::class,
             \TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement\Tca::class
         ]
-    ],
+    ]
 ];

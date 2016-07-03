@@ -30,7 +30,7 @@ class Positions implements FormDataProviderInterface
      */
     public function addData(array $result)
     {
-        $columnName = $result['processedTca']['contentElementTca']['column_name'];
+        $columnName = $result['processedTca']['contentContainerConfig']['column_name'];
         $tcaConfiguration = $result['processedTca']['columns'][$columnName]['config'];
         
         foreach ($result['processedTca']['columns'][$columnName]['children'] as $key => &$child) {

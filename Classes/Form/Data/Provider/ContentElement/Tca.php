@@ -27,7 +27,6 @@ class Tca implements FormDataProviderInterface
      *
      * @param array $result
      * @return array
-     * @todo Add processed TCA for content elements
      * @todo Add own key like `contentColumnName` additionally instead of using first element of `columnsToProcess`
      */
     public function addData(array $result)
@@ -56,9 +55,11 @@ class Tca implements FormDataProviderInterface
             );
         }
 
+        // @todo Maybe another name or another place
         $tcaConfiguration['column_name'] = $columnToProcess;
 
-        $result['processedTca']['contentElementTca'] = $tcaConfiguration;
+        $result['processedTca']['contentElementTca'] = $GLOBALS['TCA'][$tcaConfiguration['foreign_table']];
+        $result['processedTca']['contentContainerConfig'] = $tcaConfiguration;
         
         return $result;
     }

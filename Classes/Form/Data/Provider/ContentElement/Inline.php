@@ -32,7 +32,7 @@ class Inline implements FormDataProviderInterface
      */
     public function addData(array $result)
     {
-        $columnName = $result['processedTca']['contentElementTca']['column_name'];
+        $columnName = $result['processedTca']['contentContainerConfig']['column_name'];
         $formDataGroup = GeneralUtility::makeInstance(ContentElement::class);
         $formDataCompiler = GeneralUtility::makeInstance(FormDataCompiler::class, $formDataGroup);
 

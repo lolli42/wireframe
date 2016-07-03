@@ -72,12 +72,13 @@ class PageLayoutController extends ActionController
                 'renderType' => 'backendLayoutContainer',
                 'pageLayoutView' => GeneralUtility::makeInstance(PageLayoutView::class),
                 'languageUid' => $language,
-                'displayLegacyActions' => false
+                'displayLegacyActions' => true
             ], $this->compileFormData($page));
 
             $formResult = $this->createFormResult($formData);
 
             $this->view->assignMultiple([
+                'title' => $formData['recordTitle'],
                 'form' => [
                     'before' => $formResult['before'],
                     'after' => $formResult['after'],
@@ -113,12 +114,14 @@ class PageLayoutController extends ActionController
             $formData = array_merge([
                 'renderType' => 'translationContainer',
                 'pageLayoutView' => GeneralUtility::makeInstance(PageLayoutView::class),
-                'languageUids' => array_merge([0], $languages)
+                'languageUids' => array_merge([0], $languages),
+                'displayLegacyActions' => true
             ], $this->compileFormData($page));
 
             $formResult = $this->createFormResult($formData);
 
             $this->view->assignMultiple([
+                'title' => $formData['recordTitle'],
                 'form' => [
                     'before' => $formResult['before'],
                     'after' => $formResult['after'],
@@ -221,13 +224,23 @@ class PageLayoutController extends ActionController
         /** @var BackendTemplateView $view */
         parent::initializeView($view);
 
+        // @todo This is nasty! There must be a better way to append the sidebar markup!
         $this->view->getModuleTemplate()->getView()->setLayoutRootPaths(['EXT:wireframe/Resources/Private/Layouts']);
         $this->view->getModuleTemplate()->getView()->setTemplateRootPaths(['EXT:wireframe/Resources/Private/Templates']);
+
         $this->view->getModuleTemplate()->setFlashMessageQueue($this->controllerContext->getFlashMessageQueue());
 
         if ($this->request->hasArgument('page') && (int)$this->request->getArgument('page') > 0) {
             $this->createMenus((int)$this->request->getArgument('page'));
-            $this->createInspector((int)$this->request->getArgument('page'));
+            $this->createSidebar((int)$this->request->getArgument('page'));
+
+            // @todo Check access rights
+            // @todo Language overlay id
+            $this->view->getModuleTemplate()->getPageRenderer()->loadRequireJsModule('TYPO3/CMS/Backend/PageActions', 'function(PageActions) {
+                PageActions.setPageId(' . (int)$this->request->getArgument('page') . ');
+                PageActions.setLanguageOverlayId(0);
+                PageActions.initializePageTitleRenaming();
+            }');
         }
     }
 
@@ -268,16 +281,16 @@ class PageLayoutController extends ActionController
     }
 
     /**
-     * Generates the inspector
+     * Generates the sidebar
      *
      * @param int $page
      */
-    protected function createInspector($page) {
+    protected function createSidebar($page) {
         $formData = $this->compileFormData($page, Definitions::class);
         $this->view->getModuleTemplate()->getView()->assign(
-            'inspector',
+            'sidebar',
             $this->createFormResult(array_merge(
-                ['renderType' => 'contentElementDefinitionsSidebar'],
+                ['renderType' => 'contentElementSidebarContainer'],
                 $formData
             ))
         );

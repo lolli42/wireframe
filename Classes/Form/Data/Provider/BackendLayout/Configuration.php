@@ -39,7 +39,7 @@ class Configuration implements FormDataProviderInterface
      */
     public function addData(array $result)
     {
-        $columnName = $result['processedTca']['contentElementTca']['column_name'];
+        $columnName = $result['processedTca']['contentContainerConfig']['column_name'];
         $configuration = $result['pageTsConfig']['TCEMAIN.']['table.'][$result['tableName'] . '.']['backendLayout.'];
 
         if ($result['tableName'] !== 'pages' && !empty($configuration[$columnName . '.'])) {

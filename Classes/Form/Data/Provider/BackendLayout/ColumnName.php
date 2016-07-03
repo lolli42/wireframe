@@ -44,8 +44,8 @@ class ColumnName implements FormDataProviderInterface
 
         foreach ($result['processedTca']['backendLayout']['columns'] as &$column) {
             $name = BackendUtility::getProcessedValue(
-                $result['processedTca']['contentElementTca']['foreign_table'],
-                $result['processedTca']['contentElementTca']['position_column'],
+                $result['processedTca']['contentContainerConfig']['foreign_table'],
+                $result['processedTca']['contentContainerConfig']['position_column'],
                 $column['colPos']
             );
 
