@@ -55,7 +55,12 @@ class WizardContainer extends AbstractContainer
         ]);
     }
 
-    protected function renderDefinitions() {
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Backend\Form\Exception
+     */
+    protected function renderDefinitions()
+    {
         $tabs = [];
 
         foreach ($this->data['processedTca']['contentElementDefinitions'] as $group) {
@@ -89,7 +94,8 @@ class WizardContainer extends AbstractContainer
         return $view->render();
     }
 
-    protected function renderPositions() {
+    protected function renderPositions()
+    {
         if ($this->data['processedTca']['backendLayout']) {
             $formResult = $this->nodeFactory->create(array_merge($this->data, [
                 'renderType' => 'backendLayoutPositionContainer'
@@ -101,7 +107,11 @@ class WizardContainer extends AbstractContainer
         return null;
     }
 
-    protected function getTemplatePathAndFilename() {
+    /**
+     * @return string
+     */
+    protected function getTemplatePathAndFilename()
+    {
         return GeneralUtility::getFileAbsFileName(
             'EXT:wireframe/Resources/Private/Templates/Form/Container/ContentElement/Wizard.html'
         );

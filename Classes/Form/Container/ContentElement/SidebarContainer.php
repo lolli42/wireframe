@@ -53,7 +53,11 @@ class SidebarContainer extends AbstractContainer
         ]);
     }
 
-    protected function getTemplatePathAndFilename() {
+    /**
+     * @return string
+     */
+    protected function getTemplatePathAndFilename()
+    {
         return GeneralUtility::getFileAbsFileName(
             'EXT:wireframe/Resources/Private/Templates/Form/Container/ContentElement/Sidebar.html'
         );

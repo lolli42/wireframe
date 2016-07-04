@@ -16,6 +16,6 @@ $EM_CONF[$_EXTKEY] = [
             'typo3' => '8.2.0-8.2.99'
         ],
         'conflicts' => [],
-        'suggests' => [], 
+        'suggests' => [],
     ],
 ];

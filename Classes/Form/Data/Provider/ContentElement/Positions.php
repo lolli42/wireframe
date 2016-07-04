@@ -32,7 +32,7 @@ class Positions implements FormDataProviderInterface
     {
         $columnName = $result['processedTca']['contentContainerConfig']['column_name'];
         $positionField = $result['processedTca']['contentContainerConfig']['position_field'];
-        
+
         foreach ($result['processedTca']['columns'][$columnName]['children'] as $key => &$child) {
             $positionValue = $child['databaseRow'][$positionField];
             // @todo I don't get it! When is it an array in `databaseRow` and when it's not? And what if there are multiple values?

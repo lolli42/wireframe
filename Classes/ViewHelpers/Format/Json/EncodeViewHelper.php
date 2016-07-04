@@ -15,7 +15,6 @@ namespace TYPO3\CMS\Wireframe\ViewHelpers\Format\Json;
  */
 
 use TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper;
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 
 /**
  * Encode an array to JSON

@@ -14,18 +14,7 @@ namespace TYPO3\CMS\Wireframe\Form\Element\ContentElement;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Backend\View\PageLayoutView;
-use TYPO3\CMS\Backend\View\PageLayoutViewDrawItemHookInterface;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
-use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
-use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
-use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Service\FlexFormService;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\CMS\Wireframe\Form\Element\AbstractElement;
 
@@ -54,7 +43,11 @@ class WizardItemElement extends AbstractElement
         ];
     }
 
-    protected function getTemplatePathAndFilename() {
+    /**
+     * @return string
+     */
+    protected function getTemplatePathAndFilename()
+    {
         return GeneralUtility::getFileAbsFileName(
             'EXT:wireframe/Resources/Private/Templates/Form/Element/ContentElement/WizardItem.html'
         );

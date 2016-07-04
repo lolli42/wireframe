@@ -72,7 +72,7 @@ class IconViewHelper extends AbstractViewHelper
         $html = GeneralUtility::makeInstance(IconFactory::class)
             ->getIconForRecord($arguments['table'], $arguments['row'], $arguments['size'])
             ->render();
-        
+
         if ($arguments['toolTip']) {
             $html = '<span ' . BackendUtility::getRecordToolTip($arguments['row'], $arguments['table']) . '>' . $html . '</span>';
         }

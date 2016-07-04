@@ -104,7 +104,8 @@ class PositionContainer extends AbstractContainer
      * @param int $columnPosition
      * @return string
      */
-    protected function createParameters($ancestorUid, $columnPosition) {
+    protected function createParameters($ancestorUid, $columnPosition)
+    {
         return GeneralUtility::implodeArrayForUrl(
             '',
             [
@@ -126,7 +127,8 @@ class PositionContainer extends AbstractContainer
     /**
      * @return string
      */
-    protected function getTemplatePathAndFilename() {
+    protected function getTemplatePathAndFilename()
+    {
         return GeneralUtility::getFileAbsFileName(
             'EXT:wireframe/Resources/Private/Templates/Form/Container/BackendLayout/Position.html'
         );

@@ -14,9 +14,9 @@ namespace TYPO3\CMS\Wireframe\Form\Data\Provider\ContentElement;
  * The TYPO3 project - inspiring people to share!
  */
 
+use TYPO3\CMS\Backend\Form\FormDataCompiler;
 use TYPO3\CMS\Backend\Form\FormDataProviderInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Backend\Form\FormDataCompiler;
 use TYPO3\CMS\Wireframe\Form\Data\Group\ContentElement;
 
 /**

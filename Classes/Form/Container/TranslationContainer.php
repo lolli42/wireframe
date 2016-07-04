@@ -40,14 +40,14 @@ class TranslationContainer extends AbstractContainer
         $view = GeneralUtility::makeInstance(StandaloneView::class);
         $view->setTemplatePathAndFilename($this->getTemplatePathAndFilename());
 
-        uasort($this->data['systemLanguageRows'], function($a, $b) {
+        uasort($this->data['systemLanguageRows'], function ($a, $b) {
             return $a['title'] <=> $b['title'];
         });
 
         $languages = [$this->data['systemLanguageRows'][0]] + array_filter($this->data['systemLanguageRows'], function ($language) {
             return $language['uid'] > 0 && in_array($language['uid'], $this->data['languageUids']);
         });
-        
+
         for ($i = 1; $i <= (int)$this->data['processedTca']['backendLayout']['rowCount']; $i++) {
             $row = $this->data['processedTca']['backendLayout']['rows'][$i];
 
@@ -121,7 +121,8 @@ class TranslationContainer extends AbstractContainer
      * @return array
      * @throws \TYPO3\CMS\Backend\Form\Exception
      */
-    protected function createCellData($languageUid, $column) {
+    protected function createCellData($languageUid, $column)
+    {
         $childHtml = '';
 
         foreach ((array)$this->data['processedTca']['contentElementPositions'][$column['position']] as $contentElement) {
@@ -161,7 +162,8 @@ class TranslationContainer extends AbstractContainer
      * @param int $languageUid
      * @return array
      */
-    protected function createLegacyActions($position, $languageUid) {
+    protected function createLegacyActions($position, $languageUid)
+    {
         $actions = [];
 
         if ($this->data['disableContentElementWizard']) {
@@ -205,7 +207,8 @@ class TranslationContainer extends AbstractContainer
      *
      * @return string
      */
-    protected function getTemplatePathAndFilename() {
+    protected function getTemplatePathAndFilename()
+    {
         return GeneralUtility::getFileAbsFileName(
             'EXT:wireframe/Resources/Private/Templates/Form/Container/Translation.html'
         );

@@ -68,7 +68,7 @@ class Definitions implements FormDataProviderInterface
 
         $result['processedTca']['contentElementDefinitions'] = array_filter(
             $result['processedTca']['contentElementDefinitions'],
-            function($group) {
+            function ($group) {
                 return !empty($group['elements']);
             }
         );
@@ -92,7 +92,6 @@ class Definitions implements FormDataProviderInterface
             $definition = (array)$definition;
 
             if ($filter || in_array($key, $filter)) {
-
                 $this->processLabels(['title', 'description'], $definition);
                 $this->mapKeys([
                     'tt_content_defValues.' => 'defaultValues',
@@ -112,7 +111,7 @@ class Definitions implements FormDataProviderInterface
 
                 if ($this->isValidDefinition($definition, $table, $pageTsConfig)) {
                     $definition['key'] = $key;
-                    
+
                     foreach ((array)$definition['defaultValues'] as $column => $value) {
                         $definition['parameters'] .= is_array($GLOBALS['TCA'][$table]['columns'][$column]) ?
                             '&defVals[' . $table . '][' . $column . ']=' . rawurlencode($value) : '';

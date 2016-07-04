@@ -15,17 +15,16 @@ namespace TYPO3\CMS\Wireframe\Controller;
  */
 
 use TYPO3\CMS\Backend\Configuration\TranslationConfigurationProvider;
+use TYPO3\CMS\Backend\Form\FormDataCompiler;
 use TYPO3\CMS\Backend\Form\FormResultCompiler;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\View\BackendTemplateView;
 use TYPO3\CMS\Backend\View\PageLayoutView;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Wireframe\Form\Data\Group\ContentContainer;
-use TYPO3\CMS\Backend\Form\FormDataCompiler;
+use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
+use TYPO3\CMS\Wireframe\Form\Data\Group\ContentContainer;
 use TYPO3\CMS\Wireframe\Form\Data\Group\ContentElement\Definitions;
 
 /**
@@ -43,7 +42,7 @@ class PageLayoutController extends ActionController
      * @var string
      */
     protected $defaultViewObjectName = BackendTemplateView::class;
-    
+
     /**
      * @var BackendTemplateView
      */
@@ -147,7 +146,8 @@ class PageLayoutController extends ActionController
      * @param string $formDataGroupClass
      * @return array
      */
-    protected function compileFormData($page, $formDataGroupClass = ContentContainer::class) {
+    protected function compileFormData($page, $formDataGroupClass = ContentContainer::class)
+    {
         $formDataGroup = GeneralUtility::makeInstance($formDataGroupClass);
         $formDataCompiler = GeneralUtility::makeInstance(FormDataCompiler::class, $formDataGroup);
         $formDataCompilerInput = [
@@ -166,7 +166,8 @@ class PageLayoutController extends ActionController
      * @return array
      * @throws \TYPO3\CMS\Backend\Form\Exception
      */
-    protected function createFormResult($formData) {
+    protected function createFormResult($formData)
+    {
         $formResultCompiler = GeneralUtility::makeInstance(FormResultCompiler::class);
         $nodeFactory = GeneralUtility::makeInstance(NodeFactory::class);
 
@@ -285,7 +286,8 @@ class PageLayoutController extends ActionController
      *
      * @param int $page
      */
-    protected function createSidebar($page) {
+    protected function createSidebar($page)
+    {
         $formData = $this->compileFormData($page, Definitions::class);
         $this->view->getModuleTemplate()->getView()->assign(
             'sidebar',
@@ -332,7 +334,7 @@ class PageLayoutController extends ActionController
         $translationInfo = $this->translationConfigurationProvider->translationInfo('pages', $page);
         $languages = $this->translationConfigurationProvider->getSystemLanguages($page);
 
-        uasort($languages, function($a, $b) {
+        uasort($languages, function ($a, $b) {
             return $a['title'] <=> $b['title'];
         });
 

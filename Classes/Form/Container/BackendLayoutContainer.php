@@ -139,13 +139,22 @@ class BackendLayoutContainer extends AbstractContainer
         ]);
     }
 
-    protected function getTemplatePathAndFilename() {
+    /**
+     * @return string
+     */
+    protected function getTemplatePathAndFilename()
+    {
         return GeneralUtility::getFileAbsFileName(
             'EXT:wireframe/Resources/Private/Templates/Form/Container/BackendLayout.html'
         );
     }
 
-    protected function createLegacyActions($position) {
+    /**
+     * @param int $position
+     * @return array
+     */
+    protected function createLegacyActions($position)
+    {
         $actions = [];
 
         if ($this->data['disableContentElementWizard']) {

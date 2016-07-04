@@ -16,14 +16,13 @@ namespace TYPO3\CMS\Wireframe\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Form\FormDataCompiler;
 use TYPO3\CMS\Backend\Form\FormResultCompiler;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Module\AbstractModule;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-
-use TYPO3\CMS\Backend\Form\FormDataCompiler;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\CMS\Wireframe\Form\Data\Group\ContentContainer;
 use TYPO3\CMS\Wireframe\Form\Data\Group\ContentElement\Definitions;
@@ -42,11 +41,10 @@ class ContentElementController extends AbstractModule
      * @return ResponseInterface
      * @throws \TYPO3\CMS\Backend\Form\Exception
      */
-    public function createAction(ServerRequestInterface $request, ResponseInterface $response) {
+    public function createAction(ServerRequestInterface $request, ResponseInterface $response)
+    {
         // @todo How to document and validate the parameters when it's wrapped in a server request? Maybe a better process request in `AbstractModule`?
         $parameters = $request->getQueryParams();
-
-
 
         $formDataGroup = GeneralUtility::makeInstance(isset($parameters['columnPosition']) ? Definitions::class : ContentContainer::class);
         $formDataCompiler = GeneralUtility::makeInstance(FormDataCompiler::class, $formDataGroup);

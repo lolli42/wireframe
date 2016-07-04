@@ -60,7 +60,7 @@ class Tca implements FormDataProviderInterface
 
         $result['processedTca']['contentElementTca'] = $GLOBALS['TCA'][$tcaConfiguration['foreign_table']];
         $result['processedTca']['contentContainerConfig'] = $tcaConfiguration;
-        
+
         return $result;
     }
 }

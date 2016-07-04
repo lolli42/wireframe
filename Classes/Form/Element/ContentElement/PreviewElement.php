@@ -45,7 +45,7 @@ class PreviewElement extends AbstractElement
         $content = null;
         $legacyMode = $this->data['tableName'] === 'tt_content' && $this->data['pageLayoutView'] instanceof PageLayoutView;
         $view = GeneralUtility::makeInstance(StandaloneView::class);
-        
+
         $view->setTemplatePathAndFilename($this->getTemplatePathAndFilename());
 
         if ($legacyMode) {
@@ -60,7 +60,7 @@ class PreviewElement extends AbstractElement
         if ($legacyMode && $content === null) {
             $content = $this->renderLegacyContent($header);
         }
-        
+
         if ($this->data['displayLegacyActions']) {
             $this->data['processedTca']['actions'] = array_merge(
                 $this->data['processedTca']['actions'],
@@ -86,7 +86,11 @@ class PreviewElement extends AbstractElement
         return $result;
     }
 
-    protected function getTemplatePathAndFilename() {
+    /**
+     * @return string
+     */
+    protected function getTemplatePathAndFilename()
+    {
         return GeneralUtility::getFileAbsFileName(
             'EXT:wireframe/Resources/Private/Templates/Form/Element/ContentElement/Preview.html'
         );
@@ -151,7 +155,8 @@ class PreviewElement extends AbstractElement
      * @return array
      * @deprecated
      */
-    protected function createLegacyActions() {
+    protected function createLegacyActions()
+    {
         $actions = [];
 
         if ($this->data['disableContentElementWizard']) {
@@ -257,7 +262,7 @@ class PreviewElement extends AbstractElement
      */
     protected function renderLegacyContent()
     {
-        $renderText = function($text) {
+        $renderText = function ($text) {
             $text = strip_tags($text);
             $text = GeneralUtility::fixed_lgd_cs($text, 1500);
             return nl2br(htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8', false));
@@ -394,7 +399,6 @@ class PreviewElement extends AbstractElement
                     $lines[] = '<span class="label label-warning">' . htmlspecialchars($message) . '</span>';
                 }
         }
-
 
         foreach ($lines as $line) {
             $out .= '<a href="' . $this->data['actions']['edit'] . '">' . $line . '</a><br/>';
