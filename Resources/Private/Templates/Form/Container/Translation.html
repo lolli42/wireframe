@@ -9,9 +9,7 @@
         <f:for each="{rows}" as="row">
             <tr>
                 <f:for each="{row.cells}" as="cell">
-                    <td valign="top"
-                        data-uid="{cell.uid}"
-                        data-language="{cell.language}"
+                    <td valign="top" data-uid="{cell.uid}" data-language="{cell.language}"
                         class="t3js-backend-layout-language-column-{language} t3js-backend-layout-column t3-grid-cell t3-backend-layout-column t3-backend-layout-column-{cell.uid}
                             {f:if(condition: '!{cell.assigned}', then: ' t3-grid-cell-unassigned')}
                             {f:if(condition: '{cell.restricted}', then: ' t3-grid-cell-restricted')}
@@ -21,23 +19,25 @@
                             <div class="t3-backend-layout-column-header-icons"></div>
                             <div class="t3-backend-layout-column-header-label">{cell.title}</div>
                         </div>
-                        <div
-                            class="t3js-sortable t3js-sortable-lang t3js-sortable-lang-{language} t3-backend-layout-column-body
-                                {f:if(condition: '{cell.empty}', then: ' t3-backend-layout-column-body-empty')}"
-                        >
-                            <f:if condition="{cell.actions.prependContentElement}">
-                                <div class="t3js-new-content-element">
-                                    <f:if condition="{cell.actions.prependContentElement}">
-                                        <a href="{cell.actions.prependContentElement -> f:format.htmlspecialchars()}" class="btn btn-default btn-sm">
-                                            {wireframe:icon(identifier: 'actions-document-new', size: 'small')}
-                                            {f:translate(key: 'LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:content')}
-                                        </a>
-                                    </f:if>
-                                </div>
-                            </f:if>
-                            <div class="t3js-content-element-drop-zone" data-target="{uid}"></div>
-                        </div>
+                        <f:if condition="{cell.assigned}">
+                            <div class="t3js-sortable t3js-sortable-lang t3js-sortable-lang-{language} t3-backend-layout-column-body
+                                    {f:if(condition: '{cell.empty}', then: ' t3-backend-layout-column-body-empty')}
+                                 "
+                            >
+                                <f:if condition="{cell.actions.prependContentElement}">
+                                    <div class="t3js-new-content-element">
+                                        <f:if condition="{cell.actions.prependContentElement}">
+                                            <a href="{cell.actions.prependContentElement -> f:format.htmlspecialchars()}" class="btn btn-default btn-sm">
+                                                {wireframe:icon(identifier: 'actions-document-new', size: 'small')}
+                                                {f:translate(key: 'LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:content')}
+                                            </a>
+                                        </f:if>
+                                    </div>
+                                </f:if>
+                                <div class="t3js-content-element-drop-zone" data-target="{uid}"></div>
                                 {cell.childHtml -> f:format.raw()}
+                            </div>
+                        </f:if>
                     </td>
                 </f:for>
             </tr>

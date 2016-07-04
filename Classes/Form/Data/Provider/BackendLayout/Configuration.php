@@ -110,10 +110,11 @@ class Configuration implements FormDataProviderInterface
                     if (isset($column['colPos'])) {
                         $column['position'] = $column['colPos'];
                         unset($column['colPos']);
+                    } else {
+                        $column['position'] = StringUtility::getUniqueId();
                     }
 
-                    $position = is_numeric($column['position']) ? (int)$column['position'] : StringUtility::getUniqueId();
-                    $result['processedTca']['backendLayout']['columns'][$position] = $column;
+                    $result['processedTca']['backendLayout']['columns'][$column['position']] = $column;
 
                     $row['columns'][$key] = [
                         'position' => $column['position']

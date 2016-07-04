@@ -33,6 +33,7 @@ class TranslationContainer extends AbstractContainer
      * Entry method
      *
      * @return array As defined in initializeResultArray() of AbstractNode
+     * @todo Create some kind of a reusable iterator utility for layouts
      */
     public function render()
     {
@@ -55,12 +56,7 @@ class TranslationContainer extends AbstractContainer
             }
 
             for ($j = 1; $j <= (int)$this->data['processedTca']['backendLayout']['columnCount']; $j++) {
-
-                if (!is_numeric($row['columns'][$j]['position'])) {
-                    continue;
-                }
-
-                $column = $this->data['processedTca']['backendLayout']['columns'][(int)$row['columns'][$j]['position']];
+                $column = $this->data['processedTca']['backendLayout']['columns'][$row['columns'][$j]['position']];
                 $cells = [];
 
                 if (empty($column)) {
