@@ -51,6 +51,7 @@ define(['jquery', 'jquery-ui/droppable'], function($) {
 				revert: 'invalid',
 				zIndex: 100,
 				helper : 'clone',
+				appendTo: 'body',
 				start: function (event, ui) {
 					DragDrop.onDragStart($(this), $(ui.helper));
 				},

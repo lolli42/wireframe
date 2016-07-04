@@ -22,7 +22,8 @@ define(['jquery', 'jquery-ui/resizable'], function($) {
     var Sidebar = {
         containerIdentifier: '.t3js-sidebar',
         toggleIdentifier: '.t3js-sidebar-toggle',
-        borderIdentifier: '.t3js-sidebar-border',
+        splitIdentifier: '.t3js-sidebar-split',
+        panelIdentifier: '.t3js-sidebar-panel',
         toggleStates: ['collapsed', 'expanded', 'full-expanded'],
         moduleIdentifier: '.module, .module-docheader',
         options: ['minWidth', 'maxWidth'],
@@ -32,13 +33,15 @@ define(['jquery', 'jquery-ui/resizable'], function($) {
     Sidebar.initialize = function() {
         var container = $(Sidebar.containerIdentifier);
         var toggle = $(Sidebar.toggleIdentifier);
+        var viewport = $(window);
 
         toggle.on('click', Sidebar.onToggled);
+        viewport.on('resize', Sidebar.onUpdate);
 
         if (container.attr('data-resizable') !== undefined) {
             container.resizable({
                 handles: {
-                    'w': Sidebar.borderIdentifier
+                    'w': Sidebar.splitIdentifier
                 },
                 resize: Sidebar.onResizing,
                 stop: Sidebar.onResized,
@@ -51,6 +54,15 @@ define(['jquery', 'jquery-ui/resizable'], function($) {
                 }
             })
         }
+
+        Sidebar.onUpdate();
+    };
+
+    Sidebar.onUpdate = function() {
+        var height = $(window).height();
+        var panel = $(Sidebar.panelIdentifier);
+
+        panel.css('height', height + 'px');
     };
 
     Sidebar.onToggled = function() {
@@ -95,7 +107,7 @@ define(['jquery', 'jquery-ui/resizable'], function($) {
     };
 
     Sidebar.calculateWidth = function() {
-        var border = $(Sidebar.borderIdentifier);
+        var border = $(Sidebar.splitIdentifier);
         var container = $(Sidebar.containerIdentifier);
 
         return (border.length > 0 ? container.outerWidth() + border.outerWidth() : container.outerWidth());
