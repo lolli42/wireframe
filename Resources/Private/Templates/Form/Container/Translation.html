@@ -36,8 +36,8 @@
                                 </div>
                             </f:if>
                             <div class="t3js-content-element-drop-zone" data-target="{uid}"></div>
-                            {cell.childHtml -> f:format.html()}
                         </div>
+                                {cell.childHtml -> f:format.raw()}
                     </td>
                 </f:for>
             </tr>

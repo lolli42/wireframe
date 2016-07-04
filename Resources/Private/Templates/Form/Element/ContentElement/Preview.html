@@ -6,7 +6,7 @@
     <div class="t3-content-element-drag-item">
         <div class="t3-content-element-header t3-content-element-header-draggable t3js-content-element-drag-handle">
             <div class="t3-content-element-header-icons-left">
-                {wireframe:record.icon(table: '{table}', row: '{data}', contextMenu: 1, toolTip: 1, size: 'small') -> f:format.html()}
+                {wireframe:record.icon(table: '{table}', row: '{data}', contextMenu: 1, toolTip: 1, size: 'small') -> f:format.raw()}
                 <f:if condition="{flag}">
                     {wireframe:icon(identifier: '{flag}', size: 'small')}
                 </f:if>
@@ -58,7 +58,7 @@
         <div class="t3-content-element-body">
             <div class="t3-content-element-body-inner">
                 <div>
-                    {childHtml -> f:format.html()}
+                    {childHtml -> f:format.raw()}
                 </div>
             </div>
             <div class="t3-content-element-footer">
