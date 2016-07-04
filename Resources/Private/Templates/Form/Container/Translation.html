@@ -26,7 +26,7 @@
                                 {f:if(condition: '{cell.empty}', then: ' t3-backend-layout-column-body-empty')}"
                         >
                             <f:if condition="{cell.actions.prependContentElement}">
-                                <div class="t3js-new-content-element t3-new-content-element">
+                                <div class="t3js-new-content-element">
                                     <f:if condition="{cell.actions.prependContentElement}">
                                         <a href="{cell.actions.prependContentElement -> f:format.htmlspecialchars()}" class="btn btn-default btn-sm">
                                             {wireframe:icon(identifier: 'actions-document-new', size: 'small')}
