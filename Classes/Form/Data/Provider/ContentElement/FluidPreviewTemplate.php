@@ -41,8 +41,11 @@ class FluidPreviewTemplate implements FormDataProviderInterface
             );
         }
 
-        $type = empty($result['databaseRow'][$result['processedTca']['ctrl']['type']]) ? 'default' :
-            $result['databaseRow'][$result['processedTca']['ctrl']['type']];
+        $typeField = $result['processedTca']['ctrl']['type'];
+        $typeValue = empty($result['databaseRow'][$typeField]) ? 'default' : $result['databaseRow'][$typeField];
+
+        // @todo I don't get it! When is it an array in `databaseRow` and when it's not? And what if there are multiple values?
+        $type = is_array($typeValue) ? $typeValue[0] : $typeValue;
 
         if (!empty($tsConfig['properties'][$type])) {
             $result['processedTca']['fluidPreviewTemplateFilename'] = $tsConfig['properties'][$type];
