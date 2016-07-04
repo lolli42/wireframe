@@ -10,8 +10,8 @@
             <tr>
                 <f:for each="{row.cells}" as="cell">
                     <td valign="top"
-                        rowspan="{cell.rowSpan}"
-                        colspan="{cell.columnSpan}"
+                        rowspan="{f:if(condition: '{cell.rowSpan} > 0', then: '{cell.rowSpan}')}"
+                        colspan="{f:if(condition: '{cell.columnSpan} > 0', then: '{cell.columnSpan}')}"
                         data-uid="{cell.uid}"
                         class="t3js-backend-layout-column t3-grid-cell t3-backend-layout-column
                             {f:if(condition: '!{cell.assigned}', then: ' t3-grid-cell-unassigned')}
