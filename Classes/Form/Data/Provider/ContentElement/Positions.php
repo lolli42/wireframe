@@ -31,11 +31,12 @@ class Positions implements FormDataProviderInterface
     public function addData(array $result)
     {
         $columnName = $result['processedTca']['contentContainerConfig']['column_name'];
-        $tcaConfiguration = $result['processedTca']['columns'][$columnName]['config'];
+        $positionField = $result['processedTca']['contentContainerConfig']['position_field'];
         
         foreach ($result['processedTca']['columns'][$columnName]['children'] as $key => &$child) {
-            // @todo Having an array here is not always the case 
-            $position = $child['databaseRow'][$tcaConfiguration['position_field']][0];
+            $positionValue = $child['databaseRow'][$positionField];
+            // @todo I don't get it! When is it an array in `databaseRow` and when it's not? And what if there are multiple values?
+            $position = is_array($positionValue) ? $positionValue[0] : $positionValue;
             $result['processedTca']['contentElementPositions'][$position][] = &$child;
         }
 
