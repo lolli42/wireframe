@@ -30,25 +30,17 @@
 .t3-backend-layout-column-header:hover .t3-backend-layout-column-header-icons {
     opacity: 1;
 }
-.t3-backend-layout-columns-mode img.c-divider {
-    margin: 10px 0 5px 0;
-}
-.t3-backend-layout-lang-copyce {
-    margin: 10px;
-}
-.t3-content-element-wrapper {
+.t3-backend-layout-column-body {
     min-height: 2em;
+}
+.t3-backend-layout-column-body > * {
+    margin: 10px;
 }
 .t3-content-element {
     transition: opacity 0.15s ease-in;
-    margin: 10px;
 }
 .t3-content-element * {
     border-spacing: 0;
-}
-.t3-content-element > .t3-content-element {
-    margin-left: 0;
-    margin-right: 0;
 }
 .t3-content-element .t3-content-element-body-inner {
     padding: 10px;
@@ -136,7 +128,4 @@ tr:hover .t3-content-element a {
 }
 .t3-content-element-hidden:hover {
     opacity: 1.0;
-}
-.t3-new-content-element {
-    margin: 10px;
 }
