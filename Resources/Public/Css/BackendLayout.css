@@ -17,7 +17,7 @@
 }
 .t3-backend-layout-column-header {
     padding: 20px 10px 5px 10px;
-    margin: 0 0 10px 0;
+    margin: 0;
     position: relative;
     background: #ffffff;
     border-bottom: 1px solid #cdcdcd;
@@ -32,6 +32,12 @@
 }
 .t3-backend-layout-column-body {
     min-height: 2em;
+}
+.t3-backend-layout-column-body:before,
+.t3-backend-layout-column-body:after {
+    content: '';
+    display: block;
+    margin: 10px 0 0 0;
 }
 .t3-backend-layout-column-body > * {
     margin: 10px;
