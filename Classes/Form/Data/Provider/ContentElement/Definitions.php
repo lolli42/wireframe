@@ -31,14 +31,14 @@ class Definitions implements FormDataProviderInterface
      */
     public function addData(array $result)
     {
-        $table = $result['tableName'];
+        $tableName = $result['tableName'];
+        $columnName = $result['processedTca']['contentContainerConfig']['column_name'];
         $pageTsConfig = $result['pageTsConfig'];
 
-        if ($table === 'pages') {
+        if ($tableName === 'pages') {
             $groups = (array)$pageTsConfig['mod.']['wizards.']['newContentElement.']['wizardItems.'];
         } else {
-            $groups = (array)$pageTsConfig['TCEFORM.']['table.'][$table . '.']
-                [$result['processedTca']['contentContainerConfig']['column_name'] . '.']['definitions.'];
+            $groups = (array)$pageTsConfig['TCEFORM.'][$tableName . '.'][$columnName . '.']['contentElementDefinitions.'];
         }
 
         foreach ($groups as $group => $_) {
