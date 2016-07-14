@@ -67,7 +67,7 @@ class Definitions implements FormDataProviderInterface
         }
 
         $result['processedTca']['contentElementDefinitions'] = array_filter(
-            $result['processedTca']['contentElementDefinitions'],
+            (array)$result['processedTca']['contentElementDefinitions'],
             function ($group) {
                 return !empty($group['elements']);
             }
