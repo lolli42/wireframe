@@ -39,11 +39,12 @@ class Configuration implements FormDataProviderInterface
      */
     public function addData(array $result)
     {
+        $tableName = $result['tableName'];
         $columnName = $result['processedTca']['contentContainerConfig']['column_name'];
-        $configuration = $result['pageTsConfig']['TCEMAIN.']['table.'][$result['tableName'] . '.']['backendLayout.'];
+        $configuration = $result['pageTsConfig']['TCEFORM.'][$tableName . '.'][$columnName . '.'];
 
-        if ($result['tableName'] !== 'pages' && !empty($configuration[$columnName . '.'])) {
-            $configuration = ArrayUtility::flatten($configuration);
+        if ($tableName !== 'pages' && !empty($configuration['backendLayout.'])) {
+            $configuration = ArrayUtility::flatten($configuration['backendLayout.']['config.']);
 
             $layout = BackendLayout::create(
                 $result['tableName'] . '_' . $columnName,
@@ -81,8 +82,8 @@ class Configuration implements FormDataProviderInterface
                         }
                     }
                 }
-            } elseif (!empty($configuration[$columnName])) {
-                $selected = $configuration[$columnName];
+            } elseif (!empty($configuration['backendLayout'])) {
+                $selected = $configuration['backendLayout'];
             } else {
                 $selected = false;
             }
