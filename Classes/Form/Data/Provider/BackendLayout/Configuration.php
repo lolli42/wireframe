@@ -48,9 +48,9 @@ class Configuration implements FormDataProviderInterface
             $layout = BackendLayout::create(
                 $result['tableName'] . '_' . $columnName,
                 $result['tableName'] . '_' . $columnName,
-                implode('\r\n', array_map(function ($key, $value) {
+                implode("\r\n", array_map(function ($key, $value) {
                     return $key . ' = ' . $value;
-                }, $configuration))
+                }, array_keys($configuration), $configuration))
             );
         } else {
             $dataProviderCollection = GeneralUtility::makeInstance(DataProviderCollection::class);
