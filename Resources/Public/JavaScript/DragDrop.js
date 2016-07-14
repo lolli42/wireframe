@@ -168,8 +168,11 @@ define(['jquery', 'jquery-ui/droppable'], function($) {
 
 		data[tca.element.fields.position] = position;
 		data[tca.element.fields.language] = language;
-		data[tca.element.fields.foreign.table] = tca.container.table;
 		data[tca.element.fields.foreign.field] = container.data('uid');
+
+		if (tca.element.fields.foreign.table) {
+			data[tca.element.fields.foreign.table] = tca.container.table;
+		}
 
 		parameters.cmd[tca.element.table] = {};
 		parameters.data[tca.element.table] = {};
