@@ -34,26 +34,27 @@ class BackendLayoutContainer extends AbstractContainer
      */
     public function render()
     {
+        $layout = $this->data['processedTca']['backendLayout'];
         $view = GeneralUtility::makeInstance(StandaloneView::class);
         $columns = array_fill(
             0,
-            (int)$this->data['processedTca']['backendLayout']['columnCount'],
-            ['width' => 100 / (int)$this->data['processedTca']['backendLayout']['columnCount']]
+            (int)$layout['columnCount'],
+            ['width' => 100 / max((int)$layout['columnCount'], 1)]
         );
         $rows = [];
 
         $view->setTemplatePathAndFilename($this->getTemplatePathAndFilename());
 
-        for ($i = 1; $i <= (int)$this->data['processedTca']['backendLayout']['rowCount']; $i++) {
-            $row = $this->data['processedTca']['backendLayout']['rows'][$i];
+        for ($i = 1; $i <= (int)$layout['rowCount']; $i++) {
+            $row = $layout['rows'][$i];
             $cells = [];
 
             if (empty($row)) {
                 continue;
             }
 
-            for ($j = 1; $j <= (int)$this->data['processedTca']['backendLayout']['columnCount']; $j++) {
-                $column = $this->data['processedTca']['backendLayout']['columns'][$row['columns'][$j]['position']];
+            for ($j = 1; $j <= (int)$layout['columnCount']; $j++) {
+                $column = $layout['columns'][$row['columns'][$j]['position']];
                 $childHtml = '';
 
                 if (empty($column)) {
