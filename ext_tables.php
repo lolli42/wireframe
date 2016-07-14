@@ -13,7 +13,11 @@ if (TYPO3_MODE === 'BE') {
         [
             'access' => 'user,group',
             'icon' => 'EXT:backend/Resources/Public/Icons/module-page.svg',
-            'labels' => 'LLL:EXT:backend/Resources/Private/Language/locallang_mod.xlf'
+            'labels' => [
+                'title' => 'LLL:EXT:wireframe/Resources/Private/Language/ext_tables:module.layout.title',
+                'description' => 'LLL:EXT:wireframe/Resources/Private/Language/ext_tables:module.layout.description.long',
+                'shortdescription' => 'LLL:EXT:wireframe/Resources/Private/Language/ext_tables:module.layout.description.short'
+            ]
         ]
     );
 }
