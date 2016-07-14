@@ -100,8 +100,10 @@ class Configuration implements FormDataProviderInterface
             $parser->parse($parser->checkIncludeLines($layout->getConfiguration()), $conditionMatcher);
 
             // @todo Currently just a hack, an own key like `backendLayout` would be cleaner but currently not allowed because of exceptions `1438079402` and `1440601540`.
-            $result['processedTca']['backendLayout'] = GeneralUtility::removeDotsFromTS($parser->setup['backend_layout.']);
-
+            $result['processedTca']['backendLayout'] = GeneralUtility::removeDotsFromTS((array)$parser->setup['backend_layout.']);
+            $result['processedTca']['backendLayout']['rows'] = (array)$result['processedTca']['backendLayout']['rows'];
+            $result['processedTca']['backendLayout']['columns'] = (array)$result['processedTca']['backendLayout']['columns'];
+            
             // restructure configuration
             foreach ($result['processedTca']['backendLayout']['rows'] as &$row) {
                 $row['columns'] = (array)$row['columns'];
