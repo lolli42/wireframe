@@ -90,7 +90,7 @@ class Configuration implements FormDataProviderInterface
 
             $layout = $dataProviderCollection->getBackendLayout(empty($selected) ? 'default' : $selected, $result['vanillaUid']);
 
-            if ($layout === null) {
+            if (!empty($selected) && $layout === null) {
                 $layout = $dataProviderCollection->getBackendLayout('default', $result['vanillaUid']);
             }
         }
