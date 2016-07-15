@@ -105,6 +105,7 @@ class BackendLayoutContainer extends AbstractContainer
             'columns' => $columns,
             'rows' => $rows,
             'uid' => $this->data['vanillaUid'],
+            'pid' => $this->data['effectivePid'],
             'language' => $this->data['languageUid'],
             'tca' => [
                 'container' => [

@@ -166,6 +166,7 @@ define(['jquery', 'jquery-ui/droppable'], function($) {
 			data: {}
 		};
 
+		data.pid = container.data('pid');
 		data[tca.element.fields.position] = position;
 		data[tca.element.fields.language] = language;
 		data[tca.element.fields.foreign.field] = container.data('uid');
@@ -195,7 +196,6 @@ define(['jquery', 'jquery-ui/droppable'], function($) {
 			}
 		} else {
 			// @todo What about `rootLevel !== 0`?
-			data.pid = target;
 			parameters.data[tca.element.table].NEW = $draggable.data('values');
 			$.extend(parameters.data[tca.element.table].NEW, data);
 		}
