@@ -31,24 +31,26 @@ class FluidPreviewTemplate implements FormDataProviderInterface
      */
     public function addData(array $result)
     {
-        if ($result['inlineParentTableName'] === 'pages') {
-            $tsConfig = BackendUtility::getModTSconfig(
-                $result['databaseRow']['pid'], 'mod.web_layout.' . $result['tableName'] . '.preview'
-            );
-        } else {
-            $tsConfig = BackendUtility::getModTSconfig(
-                $result['databaseRow']['pid'], 'TCEFORM.table.' . $result['tableName'] . '.' . $result['inlineParentFieldName'] . '.preview'
-            );
-        }
-
         $typeField = $result['processedTca']['ctrl']['type'];
         $typeValue = empty($result['databaseRow'][$typeField]) ? 'default' : $result['databaseRow'][$typeField];
 
         // @todo I don't get it! When is it an array in `databaseRow` and when it's not? And what if there are multiple values?
         $type = is_array($typeValue) ? $typeValue[0] : $typeValue;
 
-        if (!empty($tsConfig['properties'][$type])) {
-            $result['processedTca']['fluidPreviewTemplateFilename'] = $tsConfig['properties'][$type];
+        if ($result['inlineParentTableName'] === 'pages') {
+            $tsConfig = BackendUtility::getModTSconfig(
+                $result['databaseRow']['pid'],
+                'mod.web_layout.' . $result['tableName'] . '.preview.' . $type
+            );
+        } else {
+            $tsConfig = BackendUtility::getModTSconfig(
+                $result['databaseRow']['pid'],
+                'TCEFORM.' . $result['inlineParentTableName'] . '.' . $result['inlineParentFieldName'] . '.contentElementPreview.' . $type
+            );
+        }
+
+        if (!empty($tsConfig['value'])) {
+            $result['processedTca']['fluidPreviewTemplateFilename'] = $tsConfig['value'];
         }
 
         return $result;
