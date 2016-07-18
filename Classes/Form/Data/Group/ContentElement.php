@@ -21,6 +21,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * A data provider group for postprocessing an inline content element
+ *
+ * Really? don't get it. Also, it is rather unfortunate there is both a
+ * class "contentElement" as well as a sub namespace "contentElement" ... confusing
  */
 class ContentElement implements FormDataGroupInterface
 {

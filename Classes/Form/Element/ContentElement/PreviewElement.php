@@ -137,6 +137,8 @@ class PreviewElement extends AbstractElement
             $view->assignMultiple($this->data['databaseRow']);
 
             if (!empty($this->data['databaseRow']['pi_flexform'])) {
+                // We may have a look at this detail, it should be possible to do that without
+                // using this extbase service, but to stick to ext:backend / ext:core classes
                 $flexFormService = GeneralUtility::makeInstance(FlexFormService::class);
                 $view->assign(
                     'pi_flexform_transformed',

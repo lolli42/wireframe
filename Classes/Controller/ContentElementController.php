@@ -29,6 +29,16 @@ use TYPO3\CMS\Wireframe\Form\Data\Group\ContentElement\Definitions;
 
 /**
  * Controller for content element wizard
+ *
+ * Hint: This is the "new content element wizard" that kicks in after clicking
+ * "+ cotent" in page module.
+ *
+ * Imho: rename this module - and further fate of this module should be discussed anyway
+ * iirc, for page module, it was planed, to:
+ * ** click "+ content"
+ * ** sidebar wizard folds out
+ * ** click an element
+ * In this case, this controller here could vanish
  */
 class ContentElementController extends AbstractModule
 {
@@ -56,9 +66,15 @@ class ContentElementController extends AbstractModule
             'columnsToProcess' => [$parameters['containerField'] ? (string)$parameters['containerField'] : 'content']
         ];
 
-        $formData = array_merge([
-            'languageUid' => $parameters['languageUid'] ? (int)$parameters['languageUid'] : 0
-        ], $formDataCompiler->compile($formDataCompilerInput));
+        // we should think about this - the reason to do this array merge here is that the FormDataCompiler
+        // currently does not allow to add new keys to the main array. This restriction could be lifted,
+        // artus has ideas about that already
+        $formData = array_merge(
+            [
+                'languageUid' => $parameters['languageUid'] ? (int)$parameters['languageUid'] : 0
+            ],
+            $formDataCompiler->compile($formDataCompilerInput)
+        );
         $formResultCompiler = GeneralUtility::makeInstance(FormResultCompiler::class);
         $formResult = GeneralUtility::makeInstance(NodeFactory::class)->create(array_merge(
             ['renderType' => 'contentElementWizardContainer'],

@@ -32,6 +32,9 @@ use TYPO3\CMS\Wireframe\Form\Data\Group\ContentElement\Definitions;
  */
 class PageLayoutController extends ActionController
 {
+    // We should drop the extbase usage here - it has no huge benefit anyway as
+    // far as i can see.
+
 
     /**
      * @var TranslationConfigurationProvider
@@ -54,6 +57,7 @@ class PageLayoutController extends ActionController
     public function __construct()
     {
         parent::__construct();
+        // maybe use constructor injection here - would simplify testing
         $this->translationConfigurationProvider = GeneralUtility::makeInstance(TranslationConfigurationProvider::class);
     }
 
@@ -66,6 +70,8 @@ class PageLayoutController extends ActionController
      */
     public function indexAction($page, $language = 0)
     {
+        // needs more conditions - see functionality of old page module on
+        // storage folder for instance.
         if ($page > 0) {
             $formData = array_merge([
                 'renderType' => 'backendLayoutContainer',
